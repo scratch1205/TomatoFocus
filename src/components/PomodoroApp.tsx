@@ -7,7 +7,6 @@ import SettingsPanel from './SettingsPanel';
 import EditModal from './EditModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
 import Notification from './Notification';
-import FullscreenClock from './FullscreenClock';
 
 interface Task {
   id: number;
@@ -46,7 +45,6 @@ const PomodoroApp: React.FC = () => {
   const [activePanel, setActivePanel] = useState('pomodoro');
   const [showSettings, setShowSettings] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showFullscreenClock, setShowFullscreenClock] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [notification, setNotification] = useState({ show: false, message: '' });
 
@@ -349,10 +347,6 @@ const PomodoroApp: React.FC = () => {
     return ((total - timeLeft) / total) * 283; // 283 is circumference for r=45
   };
 
-  const handleTimerClick = () => {
-    setShowFullscreenClock(true);
-  };
-
   return (
     <>
       {/* Hidden audio for notifications */}
@@ -403,7 +397,7 @@ const PomodoroApp: React.FC = () => {
         <div className="main-panel">
           {/* 番茄钟计时器 */}
           <div className="pomodoro-container">
-            <div className="timer-display" onClick={handleTimerClick}>
+            <div className="timer-display">
               {/* 水波纹效果 */}
               {isRunning && (
                 <div className="ripple-container">
@@ -518,12 +512,6 @@ const PomodoroApp: React.FC = () => {
           setShowEditModal(false);
           setEditingTask(null);
         }}
-      />
-
-      {/* 全屏翻页时钟 */}
-      <FullscreenClock
-        show={showFullscreenClock}
-        onClose={() => setShowFullscreenClock(false)}
       />
 
       {/* 通知 */}

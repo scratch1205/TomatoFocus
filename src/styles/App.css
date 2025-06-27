@@ -135,11 +135,6 @@ body {
   margin: 20px 0 30px;
   cursor: pointer;
   position: relative;
-  transition: transform 0.2s ease;
-}
-
-.timer-display:hover {
-  transform: scale(1.02);
 }
 
 .timer-circle {
@@ -775,134 +770,6 @@ body {
   margin-right: 10px;
 }
 
-/* 全屏翻页时钟样式 */
-.fullscreen-clock {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #0a0a19, #1a1a2e);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-}
-
-.fullscreen-clock.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.close-clock {
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: white;
-  font-size: 1.5rem;
-}
-
-.close-clock:hover {
-  background: var(--danger);
-  transform: rotate(90deg);
-}
-
-.flip-clock-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 40px;
-}
-
-.flip-time {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-family: 'Courier New', monospace;
-}
-
-.flip-digit-group {
-  display: flex;
-  gap: 8px;
-}
-
-.flip-digit {
-  position: relative;
-  width: 120px;
-  height: 180px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.flip-digit-top,
-.flip-digit-bottom {
-  position: absolute;
-  width: 100%;
-  height: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 0 20px rgba(67, 97, 238, 0.8);
-}
-
-.flip-digit-top {
-  top: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border-radius: 15px 15px 0 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.flip-digit-bottom {
-  bottom: 0;
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border-radius: 0 0 15px 15px;
-}
-
-.flip-separator {
-  font-size: 6rem;
-  font-weight: 700;
-  color: var(--primary);
-  text-shadow: 0 0 30px rgba(67, 97, 238, 0.8);
-  animation: blink 2s infinite;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.3; }
-}
-
-.flip-date {
-  font-size: 2.5rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-  max-width: 90%;
-  line-height: 1.4;
-  font-weight: 300;
-  letter-spacing: 2px;
-}
-
 /* 响应式设计 */
 @media (max-width: 900px) {
   .container {
@@ -934,24 +801,6 @@ body {
     width: 45px;
     height: 45px;
   }
-
-  .flip-digit {
-    width: 80px;
-    height: 120px;
-  }
-
-  .flip-digit-top,
-  .flip-digit-bottom {
-    font-size: 2.5rem;
-  }
-
-  .flip-separator {
-    font-size: 4rem;
-  }
-
-  .flip-date {
-    font-size: 1.8rem;
-  }
 }
 
 @media (max-width: 600px) {
@@ -982,30 +831,5 @@ body {
   
   .dock-item i {
     font-size: 1.2rem;
-  }
-
-  .flip-digit {
-    width: 60px;
-    height: 90px;
-  }
-
-  .flip-digit-top,
-  .flip-digit-bottom {
-    font-size: 2rem;
-  }
-
-  .flip-separator {
-    font-size: 3rem;
-  }
-
-  .flip-date {
-    font-size: 1.4rem;
-  }
-
-  .close-clock {
-    width: 50px;
-    height: 50px;
-    top: 20px;
-    right: 20px;
   }
 }
