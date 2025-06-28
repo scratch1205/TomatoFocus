@@ -44,7 +44,7 @@ const WhiteNoisePlayer: React.FC = () => {
       {/* Hidden audio element - using placeholder sound since soundvery.com might not have direct MP3 links */}
       <audio
         ref={audioRef}
-        src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcBzWOzvLJe"
+        src="https://st2.asoftmurmur.com/assets/p/content/rain/main-rain.mp4"
         loop
       />
       
