@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Clock, Settings, BarChart3, Music, Upload, Download, Play, Pause, RotateCcw, Plus, Edit, Trash2, Check, X, Calendar, Target } from 'lucide-react';
+import { Clock, Settings, BarChart3, Music, Upload, Download, Play, Pause, RotateCcw, Plus, Edit, Trash2, Check, X, Calendar, Target, Maximize } from 'lucide-react';
 import StatsPanel from './StatsPanel';
 import TaskManager from './TaskManager';
 import CalendarWidget from './CalendarWidget';
@@ -7,6 +7,7 @@ import SettingsPanel from './SettingsPanel';
 import EditModal from './EditModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
 import Notification from './Notification';
+import FullscreenClock from './FullscreenClock';
 
 interface Task {
   id: number;
@@ -47,6 +48,7 @@ const PomodoroApp: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [notification, setNotification] = useState({ show: false, message: '' });
+  const [showFullscreenClock, setShowFullscreenClock] = useState(false);
 
   // Task states
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -385,6 +387,13 @@ const PomodoroApp: React.FC = () => {
           <span className="tooltip">白噪音</span>
         </div>
         <div
+          className={`dock-item ${showFullscreenClock ? 'active' : ''}`}
+          onClick={() => setShowFullscreenClock(true)}
+        >
+          <Maximize size={24} />
+          <span className="tooltip">全屏时钟</span>
+        </div>
+        <div
           className={`dock-item ${showSettings ? 'active' : ''}`}
           onClick={() => setShowSettings(!showSettings)}
         >
@@ -490,6 +499,15 @@ const PomodoroApp: React.FC = () => {
           <CalendarWidget checkins={checkins} />
         </div>
       </div>
+
+      {/* 全屏翻页时钟 */}
+      <FullscreenClock
+        show={showFullscreenClock}
+        onClose={() => setShowFullscreenClock(false)}
+        isTimerRunning={isRunning}
+        timerTime={formatTime(timeLeft)}
+        timerStatus={isWorkTime ? '工作中' : '休息中'}
+      />
 
       {/* 设置面板 */}
       <SettingsPanel
