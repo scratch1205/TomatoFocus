@@ -53,7 +53,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
   if (!show) return null;
 
   return (
-    <div className="fullscreen-clock">
+    <div className={`fullscreen-clock ${show ? 'active' : ''}`}>
       {/* 关闭按钮 */}
       <button className="close-clock-btn" onClick={onClose}>
         <X size={24} />
