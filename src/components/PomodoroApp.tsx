@@ -189,7 +189,7 @@ const PomodoroApp: React.FC = () => {
     }
   }, [settings.enableFullscreen]);
 
-  // Timer effect - 修复暂停重置bug
+  // 核心计时器逻辑 - 移除workTime和breakTime依赖
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
       timerRef.current = setTimeout(() => {
@@ -220,7 +220,7 @@ const PomodoroApp: React.FC = () => {
         clearTimeout(timerRef.current);
       }
     };
-  }, [isRunning, timeLeft, isWorkTime, workTime, breakTime]); // 保持原有依赖项
+  }, [isRunning, timeLeft, isWorkTime]); // 移除workTime和breakTime依赖
 
   // 单独处理工作/休息时间变化时的重置逻辑
   useEffect(() => {
