@@ -1597,23 +1597,48 @@ body {
   letter-spacing: 2px;
 }
 
-/* 翻页时钟样式 */
-.flip-clock-container {
+/* 纯翻页时钟样式 - 模仿FlipFlow */
+.pure-flip-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+}
+
+.flip-clock-main {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 40px;
 }
 
-.flip-time {
+.flip-time-group {
   display: flex;
+  align-items: center;
+  gap: 40px;
+  justify-content: center;
+}
+
+.flip-time-section {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 20px;
 }
 
-.flip-digit-group {
+.flip-digits-row {
   display: flex;
-  gap: 10px;
+  gap: 15px;
+}
+
+.flip-digit-large {
+  width: 160px;
+  height: 240px;
+  position: relative;
+  perspective: 1000px;
 }
 
 .flip-digit {
@@ -1628,7 +1653,19 @@ body {
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.6s;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flip-card-large {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flip-card.flipping {
+  transform: rotateX(180deg);
 }
 
 .flip-card-inner {
@@ -1647,23 +1684,110 @@ body {
   height: 100%;
   backface-visibility: hidden;
   background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
-  border-radius: 15px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 5rem;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   font-family: 'Alibaba PuHuiTi', 'SF Pro Rounded', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.flip-digit-large .flip-card-front,
+.flip-digit-large .flip-card-back {
+  font-size: 8rem;
+  border-radius: 25px;
+  border: 4px solid rgba(255, 255, 255, 0.15);
+}
+
+.flip-digit .flip-card-front,
+.flip-digit .flip-card-back {
+  font-size: 6rem;
 }
 
 .flip-card-back {
-  transform: rotateY(180deg);
+  transform: rotateX(180deg);
+}
+
+/* 添加渐变光效 */
+.flip-card-front::before,
+.flip-card-back::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.8s ease;
+}
+
+.flip-card.flipping .flip-card-front::before {
+  left: 100%;
+}
+
+.flip-separator-large {
+  font-size: 8rem;
+  font-weight: 900;
+  color: var(--primary);
+  text-shadow: 0 0 40px rgba(67, 97, 238, 0.8);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from {
+    text-shadow: 0 0 40px rgba(67, 97, 238, 0.8);
+  }
+  to {
+    text-shadow: 0 0 60px rgba(67, 97, 238, 1), 0 0 80px rgba(67, 97, 238, 0.6);
+  }
+}
+
+.flip-label {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
+}
+
+.flip-date-display {
+  font-size: 3rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  font-weight: 300;
+  letter-spacing: 3px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
+}
+
+/* 翻页时钟样式 */
+.flip-clock-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.flip-time {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.flip-digit-group {
+  display: flex;
+  gap: 10px;
 }
 
 .flip-separator {
@@ -2018,6 +2142,35 @@ body {
     font-size: 1.5rem;
   }
 
+  /* 纯翻页时钟响应式 */
+  .flip-time-group {
+    gap: 25px;
+  }
+
+  .flip-digit-large {
+    width: 120px;
+    height: 180px;
+  }
+
+  .flip-digit-large .flip-card-front,
+  .flip-digit-large .flip-card-back {
+    font-size: 5rem;
+  }
+
+  .flip-separator-large {
+    font-size: 5rem;
+  }
+
+  .flip-label {
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+  }
+
+  .flip-date-display {
+    font-size: 2rem;
+    letter-spacing: 2px;
+  }
+
   /* 番茄钟模式响应式 */
   .flip-digit.pomodoro-digit {
     width: 140px;
@@ -2144,6 +2297,37 @@ body {
 
   .analog-number {
     font-size: 1.2rem;
+  }
+
+  /* 纯翻页时钟小屏幕 */
+  .flip-time-group {
+    gap: 15px;
+    flex-direction: column;
+  }
+
+  .flip-digit-large {
+    width: 90px;
+    height: 130px;
+  }
+
+  .flip-digit-large .flip-card-front,
+  .flip-digit-large .flip-card-back {
+    font-size: 3.5rem;
+  }
+
+  .flip-separator-large {
+    font-size: 3rem;
+    display: none; /* 在小屏幕上隐藏分隔符 */
+  }
+
+  .flip-label {
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+  }
+
+  .flip-date-display {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
   }
 
   /* 番茄钟模式小屏幕 */

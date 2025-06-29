@@ -28,14 +28,69 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [miniTimerPos, setMiniTimerPos] = useState({ x: 30, y: 30 });
   const [showPomodoroMode, setShowPomodoroMode] = useState(false);
+  const [flipAnimations, setFlipAnimations] = useState<{[key: string]: boolean}>({});
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date());
+      const newTime = new Date();
+      const oldTime = currentTime;
+      
+      // 检测时间变化并触发翻页动画
+      if (clockStyle === 'flip') {
+        const newTimeStr = formatTime(newTime);
+        const oldTimeStr = formatTime(oldTime);
+        
+        const newFlipAnimations: {[key: string]: boolean} = {};
+        
+        if (newTimeStr.hours !== oldTimeStr.hours) {
+          newFlipAnimations['hours0'] = true;
+          newFlipAnimations['hours1'] = true;
+        } else {
+          if (newTimeStr.hours[0] !== oldTimeStr.hours[0]) {
+            newFlipAnimations['hours0'] = true;
+          }
+          if (newTimeStr.hours[1] !== oldTimeStr.hours[1]) {
+            newFlipAnimations['hours1'] = true;
+          }
+        }
+        
+        if (newTimeStr.minutes !== oldTimeStr.minutes) {
+          newFlipAnimations['minutes0'] = true;
+          newFlipAnimations['minutes1'] = true;
+        } else {
+          if (newTimeStr.minutes[0] !== oldTimeStr.minutes[0]) {
+            newFlipAnimations['minutes0'] = true;
+          }
+          if (newTimeStr.minutes[1] !== oldTimeStr.minutes[1]) {
+            newFlipAnimations['minutes1'] = true;
+          }
+        }
+        
+        if (newTimeStr.seconds !== oldTimeStr.seconds) {
+          newFlipAnimations['seconds0'] = true;
+          newFlipAnimations['seconds1'] = true;
+        } else {
+          if (newTimeStr.seconds[0] !== oldTimeStr.seconds[0]) {
+            newFlipAnimations['seconds0'] = true;
+          }
+          if (newTimeStr.seconds[1] !== oldTimeStr.seconds[1]) {
+            newFlipAnimations['seconds1'] = true;
+          }
+        }
+        
+        setFlipAnimations(newFlipAnimations);
+        
+        // 清除动画状态
+        setTimeout(() => {
+          setFlipAnimations({});
+        }, 600);
+      }
+      
+      setCurrentTime(newTime);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [currentTime, clockStyle]);
 
   useEffect(() => {
     setShowMiniTimer(isTimerRunning);
@@ -109,6 +164,23 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
     }
   }, [isDragging, isResizing, dragStart]);
 
+  const renderFlipDigit = (digit: string, position: string, isLarge: boolean = false) => {
+    const isAnimating = flipAnimations[position];
+    const digitClass = isLarge ? 'flip-digit-large' : 'flip-digit';
+    const cardClass = isLarge ? 'flip-card-large' : 'flip-card';
+    
+    return (
+      <div className={digitClass}>
+        <div className={`flip-card ${cardClass} ${isAnimating ? 'flipping' : ''}`}>
+          <div className="flip-card-inner">
+            <div className="flip-card-front">{digit}</div>
+            <div className="flip-card-back">{digit}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderClock = () => {
     switch (clockStyle) {
       case 'digital':
@@ -175,44 +247,16 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
               <div className="flip-time pomodoro-timer">
                 {/* 分钟显示 - 超大字体 */}
                 <div className="flip-digit-group pomodoro-minutes">
-                  <div className="flip-digit pomodoro-digit">
-                    <div className="flip-card">
-                      <div className="flip-card-inner">
-                        <div className="flip-card-front pomodoro-card">{pomodoroData.minutes[0]}</div>
-                        <div className="flip-card-back pomodoro-card">{pomodoroData.minutes[0]}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flip-digit pomodoro-digit">
-                    <div className="flip-card">
-                      <div className="flip-card-inner">
-                        <div className="flip-card-front pomodoro-card">{pomodoroData.minutes[1]}</div>
-                        <div className="flip-card-back pomodoro-card">{pomodoroData.minutes[1]}</div>
-                      </div>
-                    </div>
-                  </div>
+                  {renderFlipDigit(pomodoroData.minutes[0], 'pomodoro-minutes0', true)}
+                  {renderFlipDigit(pomodoroData.minutes[1], 'pomodoro-minutes1', true)}
                 </div>
 
                 <div className="pomodoro-unit-label">分钟</div>
 
                 {/* 秒数显示 - 中等字体 */}
                 <div className="flip-digit-group pomodoro-seconds">
-                  <div className="flip-digit pomodoro-second-digit">
-                    <div className="flip-card">
-                      <div className="flip-card-inner">
-                        <div className="flip-card-front pomodoro-second-card">{pomodoroData.seconds[0]}</div>
-                        <div className="flip-card-back pomodoro-second-card">{pomodoroData.seconds[0]}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flip-digit pomodoro-second-digit">
-                    <div className="flip-card">
-                      <div className="flip-card-inner">
-                        <div className="flip-card-front pomodoro-second-card">{pomodoroData.seconds[1]}</div>
-                        <div className="flip-card-back pomodoro-second-card">{pomodoroData.seconds[1]}</div>
-                      </div>
-                    </div>
-                  </div>
+                  {renderFlipDigit(pomodoroData.seconds[0], 'pomodoro-seconds0')}
+                  {renderFlipDigit(pomodoroData.seconds[1], 'pomodoro-seconds1')}
                 </div>
 
                 <div className="pomodoro-second-label">秒</div>
@@ -238,73 +282,45 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
           );
         }
 
-        // 普通翻页时钟
+        // 纯翻页时钟 - 模仿FlipFlow样式
         return (
-          <div className="flip-clock-container">
-            <div className="flip-time">
-              <div className="flip-digit-group">
-                <div className="flip-digit">
-                  <div className="flip-card">
-                    <div className="flip-card-inner">
-                      <div className="flip-card-front">{hours[0]}</div>
-                      <div className="flip-card-back">{hours[0]}</div>
-                    </div>
+          <div className="pure-flip-clock">
+            <div className="flip-clock-main">
+              {/* 时 */}
+              <div className="flip-time-group">
+                <div className="flip-time-section">
+                  <div className="flip-digits-row">
+                    {renderFlipDigit(hours[0], 'hours0', true)}
+                    {renderFlipDigit(hours[1], 'hours1', true)}
                   </div>
+                  <div className="flip-label">时</div>
                 </div>
-                <div className="flip-digit">
-                  <div className="flip-card">
-                    <div className="flip-card-inner">
-                      <div className="flip-card-front">{hours[1]}</div>
-                      <div className="flip-card-back">{hours[1]}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <div className={`flip-separator ${enableAnimations ? 'animated-separator' : ''}`}>:</div>
+                <div className="flip-separator-large">:</div>
 
-              <div className="flip-digit-group">
-                <div className="flip-digit">
-                  <div className="flip-card">
-                    <div className="flip-card-inner">
-                      <div className="flip-card-front">{minutes[0]}</div>
-                      <div className="flip-card-back">{minutes[0]}</div>
-                    </div>
+                {/* 分 */}
+                <div className="flip-time-section">
+                  <div className="flip-digits-row">
+                    {renderFlipDigit(minutes[0], 'minutes0', true)}
+                    {renderFlipDigit(minutes[1], 'minutes1', true)}
                   </div>
+                  <div className="flip-label">分</div>
                 </div>
-                <div className="flip-digit">
-                  <div className="flip-card">
-                    <div className="flip-card-inner">
-                      <div className="flip-card-front">{minutes[1]}</div>
-                      <div className="flip-card-back">{minutes[1]}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <div className={`flip-separator ${enableAnimations ? 'animated-separator' : ''}`}>:</div>
+                <div className="flip-separator-large">:</div>
 
-              <div className="flip-digit-group">
-                <div className="flip-digit">
-                  <div className="flip-card">
-                    <div className="flip-card-inner">
-                      <div className="flip-card-front">{seconds[0]}</div>
-                      <div className="flip-card-back">{seconds[0]}</div>
-                    </div>
+                {/* 秒 */}
+                <div className="flip-time-section">
+                  <div className="flip-digits-row">
+                    {renderFlipDigit(seconds[0], 'seconds0', true)}
+                    {renderFlipDigit(seconds[1], 'seconds1', true)}
                   </div>
-                </div>
-                <div className="flip-digit">
-                  <div className="flip-card">
-                    <div className="flip-card-inner">
-                      <div className="flip-card-front">{seconds[1]}</div>
-                      <div className="flip-card-back">{seconds[1]}</div>
-                    </div>
-                  </div>
+                  <div className="flip-label">秒</div>
                 </div>
               </div>
             </div>
 
-            <div className="flip-date">
+            <div className="flip-date-display">
               {formatDate(currentTime)}
             </div>
 
