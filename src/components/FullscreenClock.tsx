@@ -78,6 +78,36 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
           }
         }
         
+        // 番茄钟模式的翻页动画检测
+        if (showPomodoroMode && isTimerRunning) {
+          const newPomodoroData = parsePomodoroTime(timerTime);
+          const oldPomodoroData = parsePomodoroTime(formatPomodoroTime(oldTime));
+          
+          if (newPomodoroData.minutes !== oldPomodoroData.minutes) {
+            newFlipAnimations['pomodoro-minutes0'] = true;
+            newFlipAnimations['pomodoro-minutes1'] = true;
+          } else {
+            if (newPomodoroData.minutes[0] !== oldPomodoroData.minutes[0]) {
+              newFlipAnimations['pomodoro-minutes0'] = true;
+            }
+            if (newPomodoroData.minutes[1] !== oldPomodoroData.minutes[1]) {
+              newFlipAnimations['pomodoro-minutes1'] = true;
+            }
+          }
+          
+          if (newPomodoroData.seconds !== oldPomodoroData.seconds) {
+            newFlipAnimations['pomodoro-seconds0'] = true;
+            newFlipAnimations['pomodoro-seconds1'] = true;
+          } else {
+            if (newPomodoroData.seconds[0] !== oldPomodoroData.seconds[0]) {
+              newFlipAnimations['pomodoro-seconds0'] = true;
+            }
+            if (newPomodoroData.seconds[1] !== oldPomodoroData.seconds[1]) {
+              newFlipAnimations['pomodoro-seconds1'] = true;
+            }
+          }
+        }
+        
         setFlipAnimations(newFlipAnimations);
         
         // 清除动画状态
@@ -90,7 +120,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentTime, clockStyle]);
+  }, [currentTime, clockStyle, showPomodoroMode, isTimerRunning, timerTime]);
 
   useEffect(() => {
     setShowMiniTimer(isTimerRunning);
@@ -112,6 +142,12 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
       weekday: 'long'
     };
     return date.toLocaleDateString('zh-CN', options);
+  };
+
+  const formatPomodoroTime = (date: Date) => {
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   // 解析番茄钟时间，显示分钟和秒数
@@ -252,34 +288,51 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
         // 如果番茄钟正在运行，显示番茄钟倒计时
         if (showPomodoroMode && isTimerRunning) {
           return (
-            <div className="flip-clock-container pomodoro-mode fullscreen-pomodoro">
-              {/* 状态指示器 */}
+            <div className="flip-clock-container fullscreen-pomodoro">
+              {/* 状态指示器 - 缩小并移到顶部 */}
               <div className="pomodoro-status-indicator-fullscreen">
                 <div className={`status-badge-fullscreen ${timerStatus === '工作中' ? 'work-mode' : 'break-mode'}`}>
                   {timerStatus}
                 </div>
               </div>
               
-              {/* 超大翻页时钟 */}
+              {/* 超大翻页时钟 - 分钟和秒数平齐 */}
               <div className="flip-time-fullscreen">
-                {/* 分钟显示 - 超超大字体，占满屏幕 */}
-                <div className="flip-digit-group-fullscreen pomodoro-minutes-fullscreen">
-                  {renderFlipDigit(pomodoroData.minutes[0], 'pomodoro-minutes0', 'ultra')}
-                  {renderFlipDigit(pomodoroData.minutes[1], 'pomodoro-minutes1', 'ultra')}
+                {/* 分钟和秒数并排显示 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '80px', justifyContent: 'center' }}>
+                  {/* 分钟显示 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px' }}>
+                    <div className="flip-digit-group-fullscreen pomodoro-minutes-fullscreen">
+                      {renderFlipDigit(pomodoroData.minutes[0], 'pomodoro-minutes0', 'ultra')}
+                      {renderFlipDigit(pomodoroData.minutes[1], 'pomodoro-minutes1', 'ultra')}
+                    </div>
+                    <div className="pomodoro-unit-label-fullscreen">分钟</div>
+                  </div>
+
+                  {/* 分隔符 */}
+                  <div style={{ 
+                    fontSize: '8rem', 
+                    fontWeight: '900', 
+                    color: 'var(--primary)', 
+                    textShadow: '0 0 40px rgba(67, 97, 238, 0.8)',
+                    fontFamily: 'Alibaba PuHuiTi, sans-serif',
+                    animation: 'pulse-glow 2s ease-in-out infinite alternate'
+                  }}>
+                    :
+                  </div>
+
+                  {/* 秒数显示 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px' }}>
+                    <div className="flip-digit-group-fullscreen pomodoro-seconds-fullscreen">
+                      {renderFlipDigit(pomodoroData.seconds[0], 'pomodoro-seconds0', 'ultra')}
+                      {renderFlipDigit(pomodoroData.seconds[1], 'pomodoro-seconds1', 'ultra')}
+                    </div>
+                    <div className="pomodoro-second-label-fullscreen">秒</div>
+                  </div>
                 </div>
-
-                <div className="pomodoro-unit-label-fullscreen">分钟</div>
-
-                {/* 秒数显示 - 大字体 */}
-                <div className="flip-digit-group-fullscreen pomodoro-seconds-fullscreen">
-                  {renderFlipDigit(pomodoroData.seconds[0], 'pomodoro-seconds0', 'large')}
-                  {renderFlipDigit(pomodoroData.seconds[1], 'pomodoro-seconds1', 'large')}
-                </div>
-
-                <div className="pomodoro-second-label-fullscreen">秒</div>
               </div>
 
-              {/* 描述信息 */}
+              {/* 描述信息 - 缩小并移到底部 */}
               <div className="pomodoro-description-fullscreen">
                 <div className="description-text-fullscreen">
                   {timerStatus === '工作中' ? '🍅 专注时间，保持高效！' : '☕ 休息时间，放松一下！'}
@@ -289,7 +342,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                 </div>
               </div>
 
-              {/* 切换回普通时钟的按钮 */}
+              {/* 切换回普通时钟的按钮 - 缩小 */}
               <button 
                 className="mode-switch-btn-fullscreen"
                 onClick={() => setShowPomodoroMode(false)}

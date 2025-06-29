@@ -1656,14 +1656,6 @@ body {
   perspective: 1000px;
 }
 
-.flip-card {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
 .flip-card-ultra {
   width: 100%;
   height: 100%;
@@ -1678,6 +1670,14 @@ body {
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flip-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .flip-card.flipping {
@@ -1845,23 +1845,23 @@ body {
 
 .pomodoro-status-indicator-fullscreen {
   position: absolute;
-  top: 10vh;
+  top: 8vh;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
 }
 
 .status-badge-fullscreen {
-  padding: 25px 60px;
-  border-radius: 60px;
-  font-size: 3rem;
-  font-weight: 900;
+  padding: 20px 50px;
+  border-radius: 50px;
+  font-size: 2.5rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 6px;
+  letter-spacing: 4px;
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
   font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
@@ -1905,53 +1905,53 @@ body {
 }
 
 .pomodoro-unit-label-fullscreen {
-  font-size: 5rem;
+  font-size: 4rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.9);
   text-align: center;
-  letter-spacing: 12px;
+  letter-spacing: 8px;
   text-transform: uppercase;
-  text-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
   font-family: 'Alibaba PuHuiTi', sans-serif;
   margin-top: 30px;
 }
 
 .pomodoro-second-label-fullscreen {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
   text-align: center;
-  letter-spacing: 8px;
+  letter-spacing: 6px;
   text-transform: uppercase;
-  text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
   font-family: 'Alibaba PuHuiTi', sans-serif;
   margin-top: 20px;
 }
 
 .pomodoro-description-fullscreen {
   position: absolute;
-  bottom: 20vh;
+  bottom: 15vh;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
   width: 100%;
 }
 
 .description-text-fullscreen {
-  font-size: 4rem;
+  font-size: 3rem;
   font-weight: 700;
   color: white;
   text-align: center;
-  text-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
-  letter-spacing: 4px;
+  text-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
+  letter-spacing: 3px;
   font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
 .time-detail-fullscreen {
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: rgba(255, 255, 255, 0.8);
   text-align: center;
   font-weight: 500;
@@ -1961,7 +1961,7 @@ body {
 
 .mode-switch-btn-fullscreen {
   position: absolute;
-  bottom: 8vh;
+  bottom: 5vh;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.15);
@@ -1969,9 +1969,9 @@ body {
   -webkit-backdrop-filter: blur(30px);
   border: 3px solid rgba(255, 255, 255, 0.3);
   color: white;
-  padding: 20px 50px;
-  border-radius: 60px;
-  font-size: 1.8rem;
+  padding: 15px 40px;
+  border-radius: 50px;
+  font-size: 1.5rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.4s ease;
@@ -2419,12 +2419,6 @@ body {
     font-size: 1.2rem;
     padding: 12px 25px;
     bottom: 5vh;
-  }
-
-  .mode-switch-btn {
-    font-size: 1rem;
-    padding: 12px 24px;
-    bottom: 60px;
   }
 
   .resizable-mini-timer {
