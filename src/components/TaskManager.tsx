@@ -7,28 +7,45 @@ interface Task {
   completed: boolean;
   created: Date;
   completedAt: Date | null;
+  color: string;
+  groupId?: number;
+}
+
+interface TaskGroup {
+  id: number;
+  name: string;
+  color: string;
+  created: Date;
 }
 
 interface TaskManagerProps {
   tasks: Task[];
-  onAddTask: (text: string) => void;
+  taskGroups: TaskGroup[];
+  selectedGroupId: number | null;
+  onAddTask: (text: string, groupId?: number) => void;
   onToggleTask: (id: number) => void;
   onDeleteTask: (id: number) => void;
   onEditTask: (task: Task) => void;
+  glassEffect: boolean;
+  animations: boolean;
 }
 
 const TaskManager: React.FC<TaskManagerProps> = ({
   tasks,
+  taskGroups,
+  selectedGroupId,
   onAddTask,
   onToggleTask,
   onDeleteTask,
-  onEditTask
+  onEditTask,
+  glassEffect,
+  animations
 }) => {
   const [taskInput, setTaskInput] = useState('');
 
   const handleAddTask = () => {
     if (taskInput.trim()) {
-      onAddTask(taskInput.trim());
+      onAddTask(taskInput.trim(), selectedGroupId || undefined);
       setTaskInput('');
     }
   };
@@ -44,10 +61,16 @@ const TaskManager: React.FC<TaskManagerProps> = ({
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const getCurrentGroupName = () => {
+    if (selectedGroupId === null) return '默认任务';
+    const group = taskGroups.find(g => g.id === selectedGroupId);
+    return group ? group.name : '默认任务';
+  };
+
   return (
     <>
       <div className="task-header">
-        <h2><Target size={20} /> 待办事项</h2>
+        <h2><Target size={20} /> {getCurrentGroupName()}</h2>
         <span>{tasks.length} 任务</span>
       </div>
 
@@ -58,8 +81,12 @@ const TaskManager: React.FC<TaskManagerProps> = ({
           onChange={(e) => setTaskInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="添加新任务..."
+          className={glassEffect ? 'glass-input' : 'solid-input'}
         />
-        <button className="btn btn-primary" onClick={handleAddTask}>
+        <button 
+          className={`btn btn-primary ${animations ? 'animated-btn' : ''}`} 
+          onClick={handleAddTask}
+        >
           <Plus size={16} />
         </button>
       </div>
@@ -68,7 +95,8 @@ const TaskManager: React.FC<TaskManagerProps> = ({
         {tasks.map((task) => (
           <div
             key={task.id}
-            className={`task-item ${task.completed ? 'completed' : ''}`}
+            className={`task-item ${task.completed ? 'completed' : ''} ${animations ? 'animated-task' : ''}`}
+            style={{ borderLeftColor: task.color }}
           >
             <input
               type="checkbox"
@@ -84,6 +112,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
                 </div>
               )}
             </div>
+            <div className="task-color-indicator" style={{ backgroundColor: task.color }}></div>
             <div className="task-actions">
               <button
                 className="task-btn"

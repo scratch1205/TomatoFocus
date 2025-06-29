@@ -28,6 +28,8 @@ interface Task {
   completed: boolean;
   created: Date;
   completedAt: Date | null;
+  color: string;
+  groupId?: number;
 }
 
 interface CheckinData {
@@ -41,6 +43,9 @@ interface StatsPanelProps {
   focusTime: number;
   tasks: Task[];
   checkins: CheckinData[];
+  dailyFocusData: { [key: string]: number };
+  glassEffect: boolean;
+  animations: boolean;
 }
 
 const StatsPanel: React.FC<StatsPanelProps> = ({
@@ -48,27 +53,33 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   completedTasks,
   focusTime,
   tasks,
-  checkins
+  checkins,
+  dailyFocusData,
+  glassEffect,
+  animations
 }) => {
   const [chartType, setChartType] = useState<'bar' | 'pie'>('bar');
 
-  // Generate weekly focus data
+  // Generate weekly focus data from real data
   const getWeeklyFocusData = () => {
     const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     const data = Array(7).fill(0);
     
-    // Simulate some data based on current focus time
-    const dailyAverage = focusTime / 7;
-    data.forEach((_, index) => {
-      data[index] = Math.floor(dailyAverage + (Math.random() - 0.5) * dailyAverage * 0.5);
-    });
+    // Get last 7 days
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toDateString();
+      data[6 - i] = Math.floor((dailyFocusData[dateStr] || 0) / 60); // Convert to minutes
+    }
     
     return {
       labels: days,
       datasets: [
         {
           label: '专注时间（分钟）',
-          data: data.map(seconds => Math.floor(seconds / 60)),
+          data: data,
           backgroundColor: 'rgba(67, 97, 238, 0.8)',
           borderColor: 'rgba(67, 97, 238, 1)',
           borderWidth: 1,
@@ -133,19 +144,19 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   };
 
   return (
-    <div className="data-panel">
+    <div className={`data-panel ${glassEffect ? 'glass-panel' : 'solid-panel'}`}>
       <h2><TrendingUp size={20} /> 专注数据分析</h2>
       
       <div className="stats-container">
-        <div className="stat-card">
+        <div className={`stat-card ${animations ? 'animated-card' : ''}`}>
           <div className="stat-value">{completedPomodoros}</div>
           <div className="stat-label">今日番茄</div>
         </div>
-        <div className="stat-card">
+        <div className={`stat-card ${animations ? 'animated-card' : ''}`}>
           <div className="stat-value">{completedTasks}</div>
           <div className="stat-label">完成任务</div>
         </div>
-        <div className="stat-card">
+        <div className={`stat-card ${animations ? 'animated-card' : ''}`}>
           <div className="stat-value">{Math.floor(focusTime / 60)}m</div>
           <div className="stat-label">专注时间</div>
         </div>
@@ -153,14 +164,14 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
 
       <div className="chart-tabs">
         <button
-          className={`chart-tab ${chartType === 'bar' ? 'active' : ''}`}
+          className={`chart-tab ${chartType === 'bar' ? 'active' : ''} ${animations ? 'animated-btn' : ''}`}
           onClick={() => setChartType('bar')}
         >
           <BarChart3 size={16} />
           <span>柱状图</span>
         </button>
         <button
-          className={`chart-tab ${chartType === 'pie' ? 'active' : ''}`}
+          className={`chart-tab ${chartType === 'pie' ? 'active' : ''} ${animations ? 'animated-btn' : ''}`}
           onClick={() => setChartType('pie')}
         >
           <PieChart size={16} />
@@ -168,7 +179,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
         </button>
       </div>
 
-      <div className="chart-container">
+      <div className={`chart-container ${glassEffect ? 'glass-chart' : 'solid-chart'}`}>
         {chartType === 'bar' ? (
           <Bar data={getWeeklyFocusData()} options={chartOptions} />
         ) : (

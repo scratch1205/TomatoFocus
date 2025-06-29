@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Clock, Settings, BarChart3, Music, Upload, Download, Play, Pause, RotateCcw, Plus, Edit, Trash2, Check, X, Calendar, Target, Maximize } from 'lucide-react';
+import { Clock, Settings, BarChart3, Music, Upload, Download, Play, Pause, RotateCcw, Plus, Edit, Trash2, Check, X, Calendar, Target, Maximize, Folder, FolderOpen } from 'lucide-react';
 import StatsPanel from './StatsPanel';
 import TaskManager from './TaskManager';
 import CalendarWidget from './CalendarWidget';
@@ -8,6 +8,7 @@ import EditModal from './EditModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
 import Notification from './Notification';
 import FullscreenClock from './FullscreenClock';
+import TaskGroupModal from './TaskGroupModal';
 
 interface Task {
   id: number;
@@ -15,6 +16,15 @@ interface Task {
   completed: boolean;
   created: Date;
   completedAt: Date | null;
+  color: string;
+  groupId?: number;
+}
+
+interface TaskGroup {
+  id: number;
+  name: string;
+  color: string;
+  created: Date;
 }
 
 interface CheckinData {
@@ -22,14 +32,24 @@ interface CheckinData {
   time: string;
 }
 
+interface AppSettings {
+  enableFullscreen: boolean;
+  enableGlassEffect: boolean;
+  enableAnimations: boolean;
+  clockStyle: 'digital' | 'flip' | 'analog';
+}
+
 interface AppData {
   tasks: Task[];
+  taskGroups: TaskGroup[];
   completedPomodoros: number;
   focusTime: number;
   completedTasks: number;
   workTime: number;
   breakTime: number;
   checkins: CheckinData[];
+  settings: AppSettings;
+  dailyFocusData: { [key: string]: number };
 }
 
 const PomodoroApp: React.FC = () => {
@@ -46,22 +66,46 @@ const PomodoroApp: React.FC = () => {
   const [activePanel, setActivePanel] = useState('pomodoro');
   const [showSettings, setShowSettings] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showTaskGroupModal, setShowTaskGroupModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [notification, setNotification] = useState({ show: false, message: '' });
   const [showFullscreenClock, setShowFullscreenClock] = useState(false);
 
   // Task states
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [taskGroups, setTaskGroups] = useState<TaskGroup[]>([]);
   const [completedTasks, setCompletedTasks] = useState(0);
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
 
   // Check-in states
   const [checkins, setCheckins] = useState<CheckinData[]>([]);
   const [todayCheckedIn, setTodayCheckedIn] = useState(false);
   const [streak, setStreak] = useState(0);
 
+  // Settings
+  const [settings, setSettings] = useState<AppSettings>({
+    enableFullscreen: false,
+    enableGlassEffect: true,
+    enableAnimations: true,
+    clockStyle: 'flip'
+  });
+
+  // Daily focus data for charts
+  const [dailyFocusData, setDailyFocusData] = useState<{ [key: string]: number }>({});
+
   // Refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Generate random color for tasks
+  const generateRandomColor = () => {
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+      '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -69,17 +113,29 @@ const PomodoroApp: React.FC = () => {
     if (savedData) {
       try {
         const data: AppData = JSON.parse(savedData);
-        setTasks(data.tasks.map(task => ({
+        setTasks(data.tasks?.map(task => ({
           ...task,
           created: new Date(task.created),
-          completedAt: task.completedAt ? new Date(task.completedAt) : null
-        })));
+          completedAt: task.completedAt ? new Date(task.completedAt) : null,
+          color: task.color || generateRandomColor()
+        })) || []);
+        setTaskGroups(data.taskGroups?.map(group => ({
+          ...group,
+          created: new Date(group.created)
+        })) || []);
         setCompletedPomodoros(data.completedPomodoros || 0);
         setFocusTime(data.focusTime || 0);
         setCompletedTasks(data.completedTasks || 0);
         setWorkTime(data.workTime || 25 * 60);
         setBreakTime(data.breakTime || 5 * 60);
         setCheckins(data.checkins || []);
+        setSettings(data.settings || {
+          enableFullscreen: false,
+          enableGlassEffect: true,
+          enableAnimations: true,
+          clockStyle: 'flip'
+        });
+        setDailyFocusData(data.dailyFocusData || {});
         
         // Check if today is already checked in
         const today = new Date().toDateString();
@@ -98,15 +154,40 @@ const PomodoroApp: React.FC = () => {
   useEffect(() => {
     const data: AppData = {
       tasks,
+      taskGroups,
       completedPomodoros,
       focusTime,
       completedTasks,
       workTime,
       breakTime,
-      checkins
+      checkins,
+      settings,
+      dailyFocusData
     };
     localStorage.setItem('pomodoroAppData', JSON.stringify(data));
-  }, [tasks, completedPomodoros, focusTime, completedTasks, workTime, breakTime, checkins]);
+  }, [tasks, taskGroups, completedPomodoros, focusTime, completedTasks, workTime, breakTime, checkins, settings, dailyFocusData]);
+
+  // Update daily focus data
+  useEffect(() => {
+    const today = new Date().toDateString();
+    if (isRunning && isWorkTime) {
+      setDailyFocusData(prev => ({
+        ...prev,
+        [today]: (prev[today] || 0) + 1
+      }));
+    }
+  }, [focusTime, isRunning, isWorkTime]);
+
+  // Apply fullscreen setting
+  useEffect(() => {
+    if (settings.enableFullscreen) {
+      document.documentElement.requestFullscreen?.();
+    } else {
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.();
+      }
+    }
+  }, [settings.enableFullscreen]);
 
   // Timer effect
   useEffect(() => {
@@ -206,16 +287,29 @@ const PomodoroApp: React.FC = () => {
     }, 3000);
   };
 
-  const addTask = (text: string) => {
+  const addTask = (text: string, groupId?: number) => {
     const newTask: Task = {
       id: Date.now(),
       text,
       completed: false,
       created: new Date(),
-      completedAt: null
+      completedAt: null,
+      color: generateRandomColor(),
+      groupId
     };
     setTasks([...tasks, newTask]);
     showNotificationMessage('任务已添加');
+  };
+
+  const addTaskGroup = (name: string) => {
+    const newGroup: TaskGroup = {
+      id: Date.now(),
+      name,
+      color: generateRandomColor(),
+      created: new Date()
+    };
+    setTaskGroups([...taskGroups, newGroup]);
+    showNotificationMessage('任务集已创建');
   };
 
   const toggleTask = (id: number) => {
@@ -247,6 +341,22 @@ const PomodoroApp: React.FC = () => {
     }
     setTasks(tasks.filter(task => task.id !== id));
     showNotificationMessage('任务已删除');
+  };
+
+  const deleteTaskGroup = (id: number) => {
+    // Delete all tasks in the group
+    const tasksInGroup = tasks.filter(task => task.groupId === id);
+    const completedTasksInGroup = tasksInGroup.filter(task => task.completed).length;
+    
+    setTasks(tasks.filter(task => task.groupId !== id));
+    setTaskGroups(taskGroups.filter(group => group.id !== id));
+    setCompletedTasks(prev => prev - completedTasksInGroup);
+    
+    if (selectedGroupId === id) {
+      setSelectedGroupId(null);
+    }
+    
+    showNotificationMessage('任务集已删除');
   };
 
   const editTask = (task: Task) => {
@@ -284,12 +394,15 @@ const PomodoroApp: React.FC = () => {
   const exportData = () => {
     const data: AppData = {
       tasks,
+      taskGroups,
       completedPomodoros,
       focusTime,
       completedTasks,
       workTime,
       breakTime,
-      checkins
+      checkins,
+      settings,
+      dailyFocusData
     };
     
     const dataStr = JSON.stringify(data, null, 2);
@@ -310,17 +423,29 @@ const PomodoroApp: React.FC = () => {
       reader.onload = (e) => {
         try {
           const data: AppData = JSON.parse(e.target?.result as string);
-          setTasks(data.tasks.map(task => ({
+          setTasks(data.tasks?.map(task => ({
             ...task,
             created: new Date(task.created),
-            completedAt: task.completedAt ? new Date(task.completedAt) : null
-          })));
+            completedAt: task.completedAt ? new Date(task.completedAt) : null,
+            color: task.color || generateRandomColor()
+          })) || []);
+          setTaskGroups(data.taskGroups?.map(group => ({
+            ...group,
+            created: new Date(group.created)
+          })) || []);
           setCompletedPomodoros(data.completedPomodoros || 0);
           setFocusTime(data.focusTime || 0);
           setCompletedTasks(data.completedTasks || 0);
           setWorkTime(data.workTime || 25 * 60);
           setBreakTime(data.breakTime || 5 * 60);
           setCheckins(data.checkins || []);
+          setSettings(data.settings || {
+            enableFullscreen: false,
+            enableGlassEffect: true,
+            enableAnimations: true,
+            clockStyle: 'flip'
+          });
+          setDailyFocusData(data.dailyFocusData || {});
           
           // Check if today is already checked in
           const today = new Date().toDateString();
@@ -349,6 +474,10 @@ const PomodoroApp: React.FC = () => {
     return ((total - timeLeft) / total) * 283; // 283 is circumference for r=45
   };
 
+  const filteredTasks = selectedGroupId 
+    ? tasks.filter(task => task.groupId === selectedGroupId)
+    : tasks.filter(task => !task.groupId);
+
   return (
     <>
       {/* Hidden audio for notifications */}
@@ -357,7 +486,7 @@ const PomodoroApp: React.FC = () => {
       </audio>
 
       {/* macOS风格顶部任务栏 */}
-      <div className="macos-dock">
+      <div className={`macos-dock ${settings.enableGlassEffect ? 'glass-effect' : 'solid-bg'} ${settings.enableAnimations ? 'animated' : ''}`}>
         <div
           className={`dock-item ${activePanel === 'pomodoro' ? 'active' : ''}`}
           onClick={() => setActivePanel('pomodoro')}
@@ -402,13 +531,13 @@ const PomodoroApp: React.FC = () => {
         </div>
       </div>
 
-      <div className="container">
+      <div className={`container ${settings.enableGlassEffect ? 'glass-container' : 'solid-container'}`}>
         <div className="main-panel">
           {/* 番茄钟计时器 */}
-          <div className="pomodoro-container">
+          <div className={`pomodoro-container ${settings.enableGlassEffect ? 'glass-panel' : 'solid-panel'}`}>
             <div className="timer-display">
               {/* 水波纹效果 */}
-              {isRunning && (
+              {isRunning && settings.enableAnimations && (
                 <div className="ripple-container">
                   <div className="ripple"></div>
                   <div className="ripple"></div>
@@ -443,11 +572,11 @@ const PomodoroApp: React.FC = () => {
             </div>
 
             <div className="timer-controls">
-              <button className="btn btn-primary" onClick={toggleTimer}>
+              <button className={`btn btn-primary ${settings.enableAnimations ? 'animated-btn' : ''}`} onClick={toggleTimer}>
                 {isRunning ? <Pause size={20} /> : <Play size={20} />}
                 <span>{isRunning ? '暂停' : '开始'}</span>
               </button>
-              <button className="btn btn-outline" onClick={resetTimer}>
+              <button className={`btn btn-outline ${settings.enableAnimations ? 'animated-btn' : ''}`} onClick={resetTimer}>
                 <RotateCcw size={20} />
                 <span>重置</span>
               </button>
@@ -464,21 +593,73 @@ const PomodoroApp: React.FC = () => {
             focusTime={focusTime}
             tasks={tasks}
             checkins={checkins}
+            dailyFocusData={dailyFocusData}
+            glassEffect={settings.enableGlassEffect}
+            animations={settings.enableAnimations}
           />
         </div>
 
         {/* 侧边面板 */}
-        <div className="tasks-container">
+        <div className={`tasks-container ${settings.enableGlassEffect ? 'glass-panel' : 'solid-panel'}`}>
+          {/* 任务集选择 */}
+          <div className="task-groups">
+            <div className="task-group-header">
+              <h3>任务集</h3>
+              <button 
+                className={`btn btn-sm btn-primary ${settings.enableAnimations ? 'animated-btn' : ''}`}
+                onClick={() => setShowTaskGroupModal(true)}
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <div className="task-group-list">
+              <div 
+                className={`task-group-item ${selectedGroupId === null ? 'active' : ''}`}
+                onClick={() => setSelectedGroupId(null)}
+              >
+                <Folder size={16} />
+                <span>默认任务</span>
+                <span className="task-count">{tasks.filter(t => !t.groupId).length}</span>
+              </div>
+              {taskGroups.map(group => (
+                <div 
+                  key={group.id}
+                  className={`task-group-item ${selectedGroupId === group.id ? 'active' : ''}`}
+                  style={{ borderLeftColor: group.color }}
+                >
+                  <div className="task-group-main" onClick={() => setSelectedGroupId(group.id)}>
+                    <FolderOpen size={16} />
+                    <span>{group.name}</span>
+                    <span className="task-count">{tasks.filter(t => t.groupId === group.id).length}</span>
+                  </div>
+                  <button 
+                    className="task-group-delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteTaskGroup(group.id);
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <TaskManager
-            tasks={tasks}
+            tasks={filteredTasks}
+            taskGroups={taskGroups}
+            selectedGroupId={selectedGroupId}
             onAddTask={addTask}
             onToggleTask={toggleTask}
             onDeleteTask={deleteTask}
             onEditTask={editTask}
+            glassEffect={settings.enableGlassEffect}
+            animations={settings.enableAnimations}
           />
           
           {/* 早起打卡部分 */}
-          <div className="checkin-section">
+          <div className={`checkin-section ${settings.enableGlassEffect ? 'glass-section' : 'solid-section'}`}>
             <div className="checkin-header">
               <div>
                 <h3>早起打卡</h3>
@@ -487,7 +668,7 @@ const PomodoroApp: React.FC = () => {
                 </div>
               </div>
               <button
-                className="checkin-btn"
+                className={`checkin-btn ${settings.enableAnimations ? 'animated-btn' : ''}`}
                 onClick={handleCheckin}
                 disabled={todayCheckedIn}
               >
@@ -496,7 +677,11 @@ const PomodoroApp: React.FC = () => {
             </div>
           </div>
           
-          <CalendarWidget checkins={checkins} />
+          <CalendarWidget 
+            checkins={checkins} 
+            glassEffect={settings.enableGlassEffect}
+            animations={settings.enableAnimations}
+          />
         </div>
       </div>
 
@@ -507,6 +692,8 @@ const PomodoroApp: React.FC = () => {
         isTimerRunning={isRunning}
         timerTime={formatTime(timeLeft)}
         timerStatus={isWorkTime ? '工作中' : '休息中'}
+        clockStyle={settings.clockStyle}
+        enableAnimations={settings.enableAnimations}
       />
 
       {/* 设置面板 */}
@@ -514,11 +701,20 @@ const PomodoroApp: React.FC = () => {
         show={showSettings}
         workTime={Math.floor(workTime / 60)}
         breakTime={Math.floor(breakTime / 60)}
+        settings={settings}
         onWorkTimeChange={(minutes) => setWorkTime(minutes * 60)}
         onBreakTimeChange={(minutes) => setBreakTime(minutes * 60)}
+        onSettingsChange={setSettings}
         onExport={exportData}
         onImport={importData}
         onClose={() => setShowSettings(false)}
+      />
+
+      {/* 任务集模态框 */}
+      <TaskGroupModal
+        show={showTaskGroupModal}
+        onSave={addTaskGroup}
+        onClose={() => setShowTaskGroupModal(false)}
       />
 
       {/* 编辑模态框 */}

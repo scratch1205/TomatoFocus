@@ -8,9 +8,11 @@ interface CheckinData {
 
 interface CalendarWidgetProps {
   checkins: CheckinData[];
+  glassEffect: boolean;
+  animations: boolean;
 }
 
-const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins }) => {
+const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins, glassEffect, animations }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
   const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
@@ -54,9 +56,10 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins }) => {
       days.push(
         <div
           key={day}
-          className={`calendar-day ${isToday ? 'today' : ''} ${isCheckedIn ? 'checked-in' : ''}`}
+          className={`calendar-day ${isToday ? 'today' : ''} ${isCheckedIn ? 'checked-in' : ''} ${animations ? 'animated-day' : ''}`}
         >
           {day}
+          {isCheckedIn && <div className="checkin-indicator">✓</div>}
         </div>
       );
     }
@@ -94,19 +97,28 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins }) => {
   ];
 
   return (
-    <div className="calendar-widget">
+    <div className={`calendar-widget ${glassEffect ? 'glass-calendar' : 'solid-calendar'}`}>
       <div className="calendar-header">
         <div className="calendar-title">
           {currentYear}年{monthNames[currentMonth]}
         </div>
         <div className="calendar-nav">
-          <button className="calendar-nav-btn" onClick={goToPrevMonth}>
+          <button 
+            className={`calendar-nav-btn ${animations ? 'animated-btn' : ''}`} 
+            onClick={goToPrevMonth}
+          >
             <ChevronLeft size={16} />
           </button>
-          <button className="calendar-nav-btn" onClick={goToToday}>
+          <button 
+            className={`calendar-nav-btn ${animations ? 'animated-btn' : ''}`} 
+            onClick={goToToday}
+          >
             今天
           </button>
-          <button className="calendar-nav-btn" onClick={goToNextMonth}>
+          <button 
+            className={`calendar-nav-btn ${animations ? 'animated-btn' : ''}`} 
+            onClick={goToNextMonth}
+          >
             <ChevronRight size={16} />
           </button>
         </div>
