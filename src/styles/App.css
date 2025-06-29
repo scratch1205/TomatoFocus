@@ -1,8 +1,54 @@
+/* 导入阿里妈妈方圆体字体 */
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-45-Light.woff2') format('woff2'),
+       url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-45-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-55-Regular.woff2') format('woff2'),
+       url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-55-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-65-Medium.woff2') format('woff2'),
+       url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-65-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-85-Bold.woff2') format('woff2'),
+       url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-85-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-95-ExtraBold.woff2') format('woff2'),
+       url('https://puhuiti.oss-cn-hangzhou.aliyuncs.com/AlibabaPuHuiTi-3-95-ExtraBold.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: 'Alibaba PuHuiTi', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 :root {
@@ -1440,7 +1486,7 @@ body {
   color: white;
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
   letter-spacing: 0.1em;
-  font-family: 'Courier New', monospace;
+  font-family: 'Alibaba PuHuiTi', 'Courier New', monospace;
 }
 
 .digital-date {
@@ -1613,6 +1659,7 @@ body {
     0 10px 30px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: 'Alibaba PuHuiTi', 'SF Pro Rounded', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
 }
 
 .flip-card-back {
@@ -1624,6 +1671,7 @@ body {
   font-weight: 700;
   color: var(--primary);
   text-shadow: 0 0 30px rgba(67, 97, 238, 0.8);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
 .flip-date {
@@ -1657,6 +1705,7 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
 .status-badge.work-mode {
@@ -1690,7 +1739,7 @@ body {
 .flip-card-front.pomodoro-card,
 .flip-card-back.pomodoro-card {
   font-size: 12rem;
-  font-family: 'SF Pro Rounded', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  font-family: 'Alibaba PuHuiTi', 'SF Pro Rounded', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
   font-weight: 900;
   background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
   border: 3px solid rgba(255, 255, 255, 0.15);
@@ -1709,6 +1758,44 @@ body {
   text-transform: uppercase;
   margin-top: 20px;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
+}
+
+/* 秒数显示样式 */
+.flip-digit-group.pomodoro-seconds {
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.flip-digit.pomodoro-second-digit {
+  width: 120px;
+  height: 160px;
+}
+
+.flip-card-front.pomodoro-second-card,
+.flip-card-back.pomodoro-second-card {
+  font-size: 6rem;
+  font-family: 'Alibaba PuHuiTi', 'SF Pro Rounded', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  background: linear-gradient(145deg, #3a3a4e, #2a2a3e);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.pomodoro-second-label {
+  font-size: 2rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-top: 15px;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
 .pomodoro-description {
@@ -1726,6 +1813,7 @@ body {
   text-align: center;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
   letter-spacing: 2px;
+  font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
 .time-detail {
@@ -1734,6 +1822,7 @@ body {
   text-align: center;
   font-weight: 400;
   letter-spacing: 1px;
+  font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
 .mode-switch-btn {
@@ -1753,6 +1842,7 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   letter-spacing: 1px;
+  font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
 .mode-switch-btn:hover {
@@ -1830,6 +1920,7 @@ body {
   margin-bottom: 5px;
   color: white;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
 .mini-timer-status {
@@ -1938,9 +2029,24 @@ body {
     font-size: 8rem;
   }
 
+  .flip-digit.pomodoro-second-digit {
+    width: 90px;
+    height: 120px;
+  }
+
+  .flip-card-front.pomodoro-second-card,
+  .flip-card-back.pomodoro-second-card {
+    font-size: 4rem;
+  }
+
   .pomodoro-unit-label {
     font-size: 2rem;
     letter-spacing: 4px;
+  }
+
+  .pomodoro-second-label {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
   }
 
   .description-text {
@@ -2051,9 +2157,24 @@ body {
     font-size: 5rem;
   }
 
+  .flip-digit.pomodoro-second-digit {
+    width: 70px;
+    height: 90px;
+  }
+
+  .flip-card-front.pomodoro-second-card,
+  .flip-card-back.pomodoro-second-card {
+    font-size: 3rem;
+  }
+
   .pomodoro-unit-label {
     font-size: 1.5rem;
     letter-spacing: 2px;
+  }
+
+  .pomodoro-second-label {
+    font-size: 1rem;
+    letter-spacing: 1px;
   }
 
   .description-text {

@@ -59,13 +59,14 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
     return date.toLocaleDateString('zh-CN', options);
   };
 
-  // 解析番茄钟时间，只显示分钟
+  // 解析番茄钟时间，显示分钟和秒数
   const parsePomodoroTime = (timeStr: string) => {
     const [minutes, seconds] = timeStr.split(':').map(Number);
     return {
       minutes: minutes.toString().padStart(2, '0'),
       seconds: seconds.toString().padStart(2, '0'),
-      totalMinutes: minutes
+      totalMinutes: minutes,
+      totalSeconds: seconds
     };
   };
 
@@ -193,6 +194,28 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                 </div>
 
                 <div className="pomodoro-unit-label">分钟</div>
+
+                {/* 秒数显示 - 中等字体 */}
+                <div className="flip-digit-group pomodoro-seconds">
+                  <div className="flip-digit pomodoro-second-digit">
+                    <div className="flip-card">
+                      <div className="flip-card-inner">
+                        <div className="flip-card-front pomodoro-second-card">{pomodoroData.seconds[0]}</div>
+                        <div className="flip-card-back pomodoro-second-card">{pomodoroData.seconds[0]}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flip-digit pomodoro-second-digit">
+                    <div className="flip-card">
+                      <div className="flip-card-inner">
+                        <div className="flip-card-front pomodoro-second-card">{pomodoroData.seconds[1]}</div>
+                        <div className="flip-card-back pomodoro-second-card">{pomodoroData.seconds[1]}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pomodoro-second-label">秒</div>
               </div>
 
               <div className="pomodoro-description">
@@ -200,7 +223,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                   {timerStatus === '工作中' ? '专注时间，保持高效！' : '休息时间，放松一下！'}
                 </div>
                 <div className="time-detail">
-                  剩余 {pomodoroData.totalMinutes} 分 {pomodoroData.seconds} 秒
+                  剩余 {pomodoroData.totalMinutes} 分 {pomodoroData.totalSeconds} 秒
                 </div>
               </div>
 
