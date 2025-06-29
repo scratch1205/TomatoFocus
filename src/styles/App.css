@@ -1342,6 +1342,328 @@ body {
   box-shadow: none;
 }
 
+/* 倒计时组件样式 */
+.countdown-widget {
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  margin-top: 20px;
+}
+
+.countdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.countdown-header h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 预设目标样式 */
+.preset-goals {
+  margin-bottom: 25px;
+}
+
+.preset-title {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.preset-goal-btn {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 12px;
+  border-left: 4px solid var(--primary);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.preset-goal-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.preset-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.preset-info {
+  flex: 1;
+}
+
+.preset-name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.preset-desc {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* 倒计时列表样式 */
+.countdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.countdown-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.countdown-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.countdown-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.countdown-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.countdown-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 20px;
+  border-left: 4px solid var(--primary);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.countdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.countdown-item.expired {
+  opacity: 0.7;
+  border-left-color: var(--danger);
+}
+
+.countdown-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.countdown-info {
+  flex: 1;
+}
+
+.countdown-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+}
+
+.category-icon {
+  font-size: 1.1rem;
+}
+
+.countdown-description {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.countdown-target-date {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.countdown-display {
+  flex-shrink: 0;
+}
+
+.time-blocks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 8px 6px;
+  min-width: 40px;
+}
+
+.time-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--success);
+  line-height: 1;
+}
+
+.time-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+.time-separator {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 4px;
+}
+
+.expired-badge {
+  background: var(--danger);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.countdown-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.countdown-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.countdown-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 空状态样式 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state svg {
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.empty-desc {
+  font-size: 0.95rem;
+  opacity: 0.7;
+}
+
+/* 倒计时模态框样式 */
+.countdown-modal {
+  max-width: 600px;
+  width: 95%;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.category-btn {
+  padding: 12px 16px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.category-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.category-btn.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+}
+
 /* 编辑模态框 */
 .edit-modal {
   position: fixed;
@@ -2275,6 +2597,32 @@ body {
   .export-buttons {
     grid-template-columns: 1fr;
   }
+
+  /* 倒计时响应式 */
+  .time-blocks {
+    gap: 6px;
+  }
+
+  .time-block {
+    padding: 6px 4px;
+    min-width: 35px;
+  }
+
+  .time-value {
+    font-size: 1rem;
+  }
+
+  .time-label {
+    font-size: 0.65rem;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {
@@ -2469,6 +2817,42 @@ body {
   .export-buttons {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  /* 倒计时小屏幕 */
+  .countdown-main {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .time-blocks {
+    gap: 4px;
+    justify-content: center;
+  }
+
+  .time-block {
+    padding: 4px 3px;
+    min-width: 30px;
+  }
+
+  .time-value {
+    font-size: 0.9rem;
+  }
+
+  .time-label {
+    font-size: 0.6rem;
+  }
+
+  .countdown-title {
+    font-size: 1rem;
+  }
+
+  .countdown-description {
+    font-size: 0.85rem;
+  }
+
+  .countdown-target-date {
+    font-size: 0.75rem;
   }
 }
 

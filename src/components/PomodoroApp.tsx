@@ -3,6 +3,7 @@ import { Clock, Settings, BarChart3, Music, Upload, Download, Play, Pause, Rotat
 import StatsPanel from './StatsPanel';
 import TaskManager from './TaskManager';
 import CalendarWidget from './CalendarWidget';
+import CountdownWidget from './CountdownWidget';
 import SettingsPanel from './SettingsPanel';
 import EditModal from './EditModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
@@ -824,6 +825,12 @@ const PomodoroApp: React.FC = () => {
               </button>
             </div>
           </div>
+          
+          {/* 目标倒计时组件 */}
+          <CountdownWidget 
+            glassEffect={settings.enableGlassEffect}
+            animations={settings.enableAnimations}
+          />
           
           <CalendarWidget 
             checkins={checkins} 
