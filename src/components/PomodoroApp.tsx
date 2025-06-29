@@ -189,11 +189,11 @@ const PomodoroApp: React.FC = () => {
     }
   }, [settings.enableFullscreen]);
 
-  // Timer effect
+  // Timer effect - 修复暂停重置bug
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
       timerRef.current = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
+        setTimeLeft(prev => prev - 1);
         if (isWorkTime) {
           setFocusTime(prev => prev + 1);
         }
@@ -220,10 +220,11 @@ const PomodoroApp: React.FC = () => {
         clearTimeout(timerRef.current);
       }
     };
-  }, [isRunning, timeLeft, isWorkTime, workTime, breakTime]);
+  }, [isRunning, timeLeft, isWorkTime, workTime, breakTime]); // 保持原有依赖项
 
-  // Update timeLeft when work/break time changes
+  // 单独处理工作/休息时间变化时的重置逻辑
   useEffect(() => {
+    // 只有在计时器未运行时才重置时间
     if (!isRunning) {
       setTimeLeft(isWorkTime ? workTime : breakTime);
     }
