@@ -164,10 +164,25 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
     }
   }, [isDragging, isResizing, dragStart]);
 
-  const renderFlipDigit = (digit: string, position: string, isLarge: boolean = false) => {
+  const renderFlipDigit = (digit: string, position: string, size: 'ultra' | 'large' | 'medium' = 'large') => {
     const isAnimating = flipAnimations[position];
-    const digitClass = isLarge ? 'flip-digit-large' : 'flip-digit';
-    const cardClass = isLarge ? 'flip-card-large' : 'flip-card';
+    let digitClass, cardClass;
+    
+    switch (size) {
+      case 'ultra':
+        digitClass = 'flip-digit-ultra';
+        cardClass = 'flip-card-ultra';
+        break;
+      case 'large':
+        digitClass = 'flip-digit-large';
+        cardClass = 'flip-card-large';
+        break;
+      case 'medium':
+      default:
+        digitClass = 'flip-digit';
+        cardClass = 'flip-card';
+        break;
+    }
     
     return (
       <div className={digitClass}>
@@ -237,43 +252,46 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
         // 如果番茄钟正在运行，显示番茄钟倒计时
         if (showPomodoroMode && isTimerRunning) {
           return (
-            <div className="flip-clock-container pomodoro-mode">
-              <div className="pomodoro-status-indicator">
-                <div className={`status-badge ${timerStatus === '工作中' ? 'work-mode' : 'break-mode'}`}>
+            <div className="flip-clock-container pomodoro-mode fullscreen-pomodoro">
+              {/* 状态指示器 */}
+              <div className="pomodoro-status-indicator-fullscreen">
+                <div className={`status-badge-fullscreen ${timerStatus === '工作中' ? 'work-mode' : 'break-mode'}`}>
                   {timerStatus}
                 </div>
               </div>
               
-              <div className="flip-time pomodoro-timer">
-                {/* 分钟显示 - 超大字体 */}
-                <div className="flip-digit-group pomodoro-minutes">
-                  {renderFlipDigit(pomodoroData.minutes[0], 'pomodoro-minutes0', true)}
-                  {renderFlipDigit(pomodoroData.minutes[1], 'pomodoro-minutes1', true)}
+              {/* 超大翻页时钟 */}
+              <div className="flip-time-fullscreen">
+                {/* 分钟显示 - 超超大字体，占满屏幕 */}
+                <div className="flip-digit-group-fullscreen pomodoro-minutes-fullscreen">
+                  {renderFlipDigit(pomodoroData.minutes[0], 'pomodoro-minutes0', 'ultra')}
+                  {renderFlipDigit(pomodoroData.minutes[1], 'pomodoro-minutes1', 'ultra')}
                 </div>
 
-                <div className="pomodoro-unit-label">分钟</div>
+                <div className="pomodoro-unit-label-fullscreen">分钟</div>
 
-                {/* 秒数显示 - 中等字体 */}
-                <div className="flip-digit-group pomodoro-seconds">
-                  {renderFlipDigit(pomodoroData.seconds[0], 'pomodoro-seconds0')}
-                  {renderFlipDigit(pomodoroData.seconds[1], 'pomodoro-seconds1')}
+                {/* 秒数显示 - 大字体 */}
+                <div className="flip-digit-group-fullscreen pomodoro-seconds-fullscreen">
+                  {renderFlipDigit(pomodoroData.seconds[0], 'pomodoro-seconds0', 'large')}
+                  {renderFlipDigit(pomodoroData.seconds[1], 'pomodoro-seconds1', 'large')}
                 </div>
 
-                <div className="pomodoro-second-label">秒</div>
+                <div className="pomodoro-second-label-fullscreen">秒</div>
               </div>
 
-              <div className="pomodoro-description">
-                <div className="description-text">
-                  {timerStatus === '工作中' ? '专注时间，保持高效！' : '休息时间，放松一下！'}
+              {/* 描述信息 */}
+              <div className="pomodoro-description-fullscreen">
+                <div className="description-text-fullscreen">
+                  {timerStatus === '工作中' ? '🍅 专注时间，保持高效！' : '☕ 休息时间，放松一下！'}
                 </div>
-                <div className="time-detail">
+                <div className="time-detail-fullscreen">
                   剩余 {pomodoroData.totalMinutes} 分 {pomodoroData.totalSeconds} 秒
                 </div>
               </div>
 
               {/* 切换回普通时钟的按钮 */}
               <button 
-                className="mode-switch-btn"
+                className="mode-switch-btn-fullscreen"
                 onClick={() => setShowPomodoroMode(false)}
               >
                 查看当前时间
@@ -290,8 +308,8 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
               <div className="flip-time-group">
                 <div className="flip-time-section">
                   <div className="flip-digits-row">
-                    {renderFlipDigit(hours[0], 'hours0', true)}
-                    {renderFlipDigit(hours[1], 'hours1', true)}
+                    {renderFlipDigit(hours[0], 'hours0', 'large')}
+                    {renderFlipDigit(hours[1], 'hours1', 'large')}
                   </div>
                   <div className="flip-label">时</div>
                 </div>
@@ -301,8 +319,8 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                 {/* 分 */}
                 <div className="flip-time-section">
                   <div className="flip-digits-row">
-                    {renderFlipDigit(minutes[0], 'minutes0', true)}
-                    {renderFlipDigit(minutes[1], 'minutes1', true)}
+                    {renderFlipDigit(minutes[0], 'minutes0', 'large')}
+                    {renderFlipDigit(minutes[1], 'minutes1', 'large')}
                   </div>
                   <div className="flip-label">分</div>
                 </div>
@@ -312,8 +330,8 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                 {/* 秒 */}
                 <div className="flip-time-section">
                   <div className="flip-digits-row">
-                    {renderFlipDigit(seconds[0], 'seconds0', true)}
-                    {renderFlipDigit(seconds[1], 'seconds1', true)}
+                    {renderFlipDigit(seconds[0], 'seconds0', 'large')}
+                    {renderFlipDigit(seconds[1], 'seconds1', 'large')}
                   </div>
                   <div className="flip-label">秒</div>
                 </div>

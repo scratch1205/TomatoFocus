@@ -1634,6 +1634,14 @@ body {
   gap: 15px;
 }
 
+/* 超大翻页数字 - 用于番茄钟全屏模式 */
+.flip-digit-ultra {
+  width: 280px;
+  height: 420px;
+  position: relative;
+  perspective: 1000px;
+}
+
 .flip-digit-large {
   width: 160px;
   height: 240px;
@@ -1654,6 +1662,14 @@ body {
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flip-card-ultra {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .flip-card-large {
@@ -1697,6 +1713,18 @@ body {
     inset 0 2px 0 rgba(255, 255, 255, 0.15);
   border: 3px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+}
+
+/* 超大翻页卡片样式 */
+.flip-digit-ultra .flip-card-front,
+.flip-digit-ultra .flip-card-back {
+  font-size: 16rem;
+  border-radius: 35px;
+  border: 6px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 30px 80px rgba(0, 0, 0, 0.7),
+    inset 0 4px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 50px rgba(255, 255, 255, 0.6);
 }
 
 .flip-digit-large .flip-card-front,
@@ -1806,147 +1834,156 @@ body {
   letter-spacing: 2px;
 }
 
-/* 番茄钟模式样式 */
-.flip-clock-container.pomodoro-mode {
-  gap: 60px;
+/* 番茄钟全屏模式样式 */
+.flip-clock-container.fullscreen-pomodoro {
+  width: 100vw;
+  height: 100vh;
+  justify-content: center;
+  gap: 80px;
+  position: relative;
 }
 
-.pomodoro-status-indicator {
+.pomodoro-status-indicator-fullscreen {
   position: absolute;
-  top: 120px;
+  top: 10vh;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 10;
 }
 
-.status-badge {
-  padding: 15px 40px;
-  border-radius: 50px;
-  font-size: 1.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  font-family: 'Alibaba PuHuiTi', sans-serif;
-}
-
-.status-badge.work-mode {
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 107, 107, 0.1));
-  color: #ff6b6b;
-  border-color: rgba(255, 107, 107, 0.4);
-  text-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
-}
-
-.status-badge.break-mode {
-  background: linear-gradient(135deg, rgba(78, 205, 196, 0.3), rgba(78, 205, 196, 0.1));
-  color: #4ecdc4;
-  border-color: rgba(78, 205, 196, 0.4);
-  text-shadow: 0 0 20px rgba(78, 205, 196, 0.8);
-}
-
-.flip-time.pomodoro-timer {
-  flex-direction: column;
-  gap: 30px;
-}
-
-.flip-digit-group.pomodoro-minutes {
-  gap: 20px;
-}
-
-.flip-digit.pomodoro-digit {
-  width: 200px;
-  height: 280px;
-}
-
-.flip-card-front.pomodoro-card,
-.flip-card-back.pomodoro-card {
-  font-size: 12rem;
-  font-family: 'Alibaba PuHuiTi', 'SF Pro Rounded', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
-  font-weight: 900;
-  background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
-  border: 3px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.6),
-    inset 0 2px 0 rgba(255, 255, 255, 0.15);
-  text-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
-}
-
-.pomodoro-unit-label {
+.status-badge-fullscreen {
+  padding: 25px 60px;
+  border-radius: 60px;
   font-size: 3rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  letter-spacing: 8px;
+  font-weight: 900;
   text-transform: uppercase;
-  margin-top: 20px;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  letter-spacing: 6px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
-/* 秒数显示样式 */
-.flip-digit-group.pomodoro-seconds {
-  gap: 15px;
-  margin-top: 30px;
+.status-badge-fullscreen.work-mode {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.4), rgba(255, 107, 107, 0.2));
+  color: #ff6b6b;
+  border-color: rgba(255, 107, 107, 0.5);
+  text-shadow: 0 0 30px rgba(255, 107, 107, 1);
 }
 
-.flip-digit.pomodoro-second-digit {
-  width: 120px;
-  height: 160px;
+.status-badge-fullscreen.break-mode {
+  background: linear-gradient(135deg, rgba(78, 205, 196, 0.4), rgba(78, 205, 196, 0.2));
+  color: #4ecdc4;
+  border-color: rgba(78, 205, 196, 0.5);
+  text-shadow: 0 0 30px rgba(78, 205, 196, 1);
 }
 
-.flip-card-front.pomodoro-second-card,
-.flip-card-back.pomodoro-second-card {
-  font-size: 6rem;
-  font-family: 'Alibaba PuHuiTi', 'SF Pro Rounded', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
-  font-weight: 700;
-  background: linear-gradient(145deg, #3a3a4e, #2a2a3e);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 15px 40px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.pomodoro-second-label {
-  font-size: 2rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-top: 15px;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-  font-family: 'Alibaba PuHuiTi', sans-serif;
-}
-
-.pomodoro-description {
+.flip-time-fullscreen {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 60px;
+  width: 100%;
+  height: 60vh;
+  justify-content: center;
+}
+
+.flip-digit-group-fullscreen {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+}
+
+.flip-digit-group-fullscreen.pomodoro-minutes-fullscreen {
+  gap: 50px;
+}
+
+.flip-digit-group-fullscreen.pomodoro-seconds-fullscreen {
+  gap: 30px;
   margin-top: 40px;
 }
 
-.description-text {
-  font-size: 2.5rem;
+.pomodoro-unit-label-fullscreen {
+  font-size: 5rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  letter-spacing: 12px;
+  text-transform: uppercase;
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
+  margin-top: 30px;
+}
+
+.pomodoro-second-label-fullscreen {
+  font-size: 3rem;
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  font-family: 'Alibaba PuHuiTi', sans-serif;
+  margin-top: 20px;
+}
+
+.pomodoro-description-fullscreen {
+  position: absolute;
+  bottom: 20vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  width: 100%;
+}
+
+.description-text-fullscreen {
+  font-size: 4rem;
+  font-weight: 700;
   color: white;
   text-align: center;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+  letter-spacing: 4px;
+  font-family: 'Alibaba PuHuiTi', sans-serif;
+}
+
+.time-detail-fullscreen {
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-weight: 500;
   letter-spacing: 2px;
   font-family: 'Alibaba PuHuiTi', sans-serif;
 }
 
-.time-detail {
+.mode-switch-btn-fullscreen {
+  position: absolute;
+  bottom: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 20px 50px;
+  border-radius: 60px;
   font-size: 1.8rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-  font-weight: 400;
-  letter-spacing: 1px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  letter-spacing: 2px;
   font-family: 'Alibaba PuHuiTi', sans-serif;
+}
+
+.mode-switch-btn-fullscreen:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(-50%) translateY(-10px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
 .mode-switch-btn {
@@ -2171,49 +2208,53 @@ body {
     letter-spacing: 2px;
   }
 
-  /* 番茄钟模式响应式 */
-  .flip-digit.pomodoro-digit {
-    width: 140px;
-    height: 200px;
+  /* 番茄钟全屏模式响应式 */
+  .flip-digit-ultra {
+    width: 200px;
+    height: 300px;
   }
 
-  .flip-card-front.pomodoro-card,
-  .flip-card-back.pomodoro-card {
-    font-size: 8rem;
+  .flip-digit-ultra .flip-card-front,
+  .flip-digit-ultra .flip-card-back {
+    font-size: 12rem;
   }
 
-  .flip-digit.pomodoro-second-digit {
-    width: 90px;
-    height: 120px;
+  .flip-digit-group-fullscreen.pomodoro-minutes-fullscreen {
+    gap: 30px;
   }
 
-  .flip-card-front.pomodoro-second-card,
-  .flip-card-back.pomodoro-second-card {
-    font-size: 4rem;
+  .flip-digit-group-fullscreen.pomodoro-seconds-fullscreen {
+    gap: 20px;
   }
 
-  .pomodoro-unit-label {
+  .pomodoro-unit-label-fullscreen {
+    font-size: 3.5rem;
+    letter-spacing: 8px;
+  }
+
+  .pomodoro-second-label-fullscreen {
     font-size: 2rem;
     letter-spacing: 4px;
   }
 
-  .pomodoro-second-label {
-    font-size: 1.5rem;
+  .description-text-fullscreen {
+    font-size: 2.5rem;
     letter-spacing: 2px;
   }
 
-  .description-text {
+  .time-detail-fullscreen {
     font-size: 1.8rem;
   }
 
-  .time-detail {
-    font-size: 1.3rem;
+  .status-badge-fullscreen {
+    font-size: 2rem;
+    padding: 20px 40px;
+    letter-spacing: 4px;
   }
 
-  .status-badge {
-    font-size: 1.3rem;
-    padding: 12px 30px;
-    letter-spacing: 2px;
+  .mode-switch-btn-fullscreen {
+    font-size: 1.4rem;
+    padding: 15px 35px;
   }
 
   .task-groups {
@@ -2330,49 +2371,54 @@ body {
     letter-spacing: 1px;
   }
 
-  /* 番茄钟模式小屏幕 */
-  .flip-digit.pomodoro-digit {
-    width: 100px;
-    height: 150px;
+  /* 番茄钟全屏模式小屏幕 */
+  .flip-digit-ultra {
+    width: 140px;
+    height: 210px;
   }
 
-  .flip-card-front.pomodoro-card,
-  .flip-card-back.pomodoro-card {
-    font-size: 5rem;
+  .flip-digit-ultra .flip-card-front,
+  .flip-digit-ultra .flip-card-back {
+    font-size: 8rem;
   }
 
-  .flip-digit.pomodoro-second-digit {
-    width: 70px;
-    height: 90px;
+  .flip-digit-group-fullscreen.pomodoro-minutes-fullscreen {
+    gap: 20px;
   }
 
-  .flip-card-front.pomodoro-second-card,
-  .flip-card-back.pomodoro-second-card {
-    font-size: 3rem;
+  .flip-digit-group-fullscreen.pomodoro-seconds-fullscreen {
+    gap: 15px;
   }
 
-  .pomodoro-unit-label {
+  .pomodoro-unit-label-fullscreen {
+    font-size: 2.5rem;
+    letter-spacing: 4px;
+  }
+
+  .pomodoro-second-label-fullscreen {
     font-size: 1.5rem;
     letter-spacing: 2px;
   }
 
-  .pomodoro-second-label {
-    font-size: 1rem;
+  .description-text-fullscreen {
+    font-size: 1.8rem;
     letter-spacing: 1px;
   }
 
-  .description-text {
+  .time-detail-fullscreen {
     font-size: 1.3rem;
   }
 
-  .time-detail {
-    font-size: 1rem;
+  .status-badge-fullscreen {
+    font-size: 1.5rem;
+    padding: 15px 30px;
+    letter-spacing: 2px;
   }
 
-  .status-badge {
-    font-size: 1rem;
-    padding: 10px 20px;
-    letter-spacing: 1px;
+  .mode-switch-btn-fullscreen {
+    font-size: 1.2rem;
+    padding: 12px 25px;
+    bottom: 5vh;
   }
 
   .mode-switch-btn {
