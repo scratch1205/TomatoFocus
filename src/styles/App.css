@@ -441,15 +441,19 @@ body {
 
 .setting-group {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .setting-label {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
   font-size: 1rem;
   opacity: 0.9;
+  cursor: pointer;
+  user-select: none;
 }
 
 .input-group {
@@ -478,17 +482,22 @@ body {
   background: rgba(0, 0, 0, 0.3);
 }
 
-/* Toggle Switch */
+/* 修复后的Toggle Switch */
 .toggle-switch {
   position: relative;
   width: 50px;
   height: 24px;
+  cursor: pointer;
 }
 
 .toggle-switch input {
+  position: absolute;
   opacity: 0;
-  width: 0;
-  height: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2;
 }
 
 .toggle-slider {
@@ -501,6 +510,7 @@ body {
   background-color: rgba(255, 255, 255, 0.2);
   transition: 0.3s;
   border-radius: 24px;
+  pointer-events: none;
 }
 
 .toggle-slider:before {
@@ -513,14 +523,24 @@ body {
   background-color: white;
   transition: 0.3s;
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-input:checked + .toggle-slider {
+.toggle-switch input:checked + .toggle-slider {
   background-color: var(--primary);
+  box-shadow: 0 0 10px rgba(67, 97, 238, 0.3);
 }
 
-input:checked + .toggle-slider:before {
+.toggle-switch input:checked + .toggle-slider:before {
   transform: translateX(26px);
+}
+
+.toggle-switch:hover .toggle-slider {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.toggle-switch input:checked:hover + .toggle-slider {
+  background-color: #5a7cfa;
 }
 
 /* Radio Group */
@@ -538,6 +558,7 @@ input:checked + .toggle-slider:before {
   padding: 8px 12px;
   border-radius: 8px;
   transition: background-color 0.3s ease;
+  user-select: none;
 }
 
 .radio-option:hover {
@@ -546,6 +567,7 @@ input:checked + .toggle-slider:before {
 
 .radio-option input[type="radio"] {
   margin: 0;
+  cursor: pointer;
 }
 
 /* 待办事项样式 */
