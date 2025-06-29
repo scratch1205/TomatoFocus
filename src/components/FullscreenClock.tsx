@@ -27,6 +27,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [miniTimerPos, setMiniTimerPos] = useState({ x: 30, y: 30 });
+  const [showPomodoroMode, setShowPomodoroMode] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -38,6 +39,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
 
   useEffect(() => {
     setShowMiniTimer(isTimerRunning);
+    setShowPomodoroMode(isTimerRunning);
   }, [isTimerRunning]);
 
   const formatTime = (date: Date) => {
@@ -57,7 +59,18 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
     return date.toLocaleDateString('zh-CN', options);
   };
 
+  // 解析番茄钟时间，只显示分钟
+  const parsePomodoroTime = (timeStr: string) => {
+    const [minutes, seconds] = timeStr.split(':').map(Number);
+    return {
+      minutes: minutes.toString().padStart(2, '0'),
+      seconds: seconds.toString().padStart(2, '0'),
+      totalMinutes: minutes
+    };
+  };
+
   const { hours, minutes, seconds } = formatTime(currentTime);
+  const pomodoroData = parsePomodoroTime(timerTime);
 
   // Handle mini timer dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -148,6 +161,61 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
 
       case 'flip':
       default:
+        // 如果番茄钟正在运行，显示番茄钟倒计时
+        if (showPomodoroMode && isTimerRunning) {
+          return (
+            <div className="flip-clock-container pomodoro-mode">
+              <div className="pomodoro-status-indicator">
+                <div className={`status-badge ${timerStatus === '工作中' ? 'work-mode' : 'break-mode'}`}>
+                  {timerStatus}
+                </div>
+              </div>
+              
+              <div className="flip-time pomodoro-timer">
+                {/* 分钟显示 - 超大字体 */}
+                <div className="flip-digit-group pomodoro-minutes">
+                  <div className="flip-digit pomodoro-digit">
+                    <div className="flip-card">
+                      <div className="flip-card-inner">
+                        <div className="flip-card-front pomodoro-card">{pomodoroData.minutes[0]}</div>
+                        <div className="flip-card-back pomodoro-card">{pomodoroData.minutes[0]}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flip-digit pomodoro-digit">
+                    <div className="flip-card">
+                      <div className="flip-card-inner">
+                        <div className="flip-card-front pomodoro-card">{pomodoroData.minutes[1]}</div>
+                        <div className="flip-card-back pomodoro-card">{pomodoroData.minutes[1]}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pomodoro-unit-label">分钟</div>
+              </div>
+
+              <div className="pomodoro-description">
+                <div className="description-text">
+                  {timerStatus === '工作中' ? '专注时间，保持高效！' : '休息时间，放松一下！'}
+                </div>
+                <div className="time-detail">
+                  剩余 {pomodoroData.totalMinutes} 分 {pomodoroData.seconds} 秒
+                </div>
+              </div>
+
+              {/* 切换回普通时钟的按钮 */}
+              <button 
+                className="mode-switch-btn"
+                onClick={() => setShowPomodoroMode(false)}
+              >
+                查看当前时间
+              </button>
+            </div>
+          );
+        }
+
+        // 普通翻页时钟
         return (
           <div className="flip-clock-container">
             <div className="flip-time">
@@ -216,6 +284,16 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
             <div className="flip-date">
               {formatDate(currentTime)}
             </div>
+
+            {/* 如果番茄钟正在运行，显示切换按钮 */}
+            {isTimerRunning && (
+              <button 
+                className="mode-switch-btn"
+                onClick={() => setShowPomodoroMode(true)}
+              >
+                查看番茄钟倒计时
+              </button>
+            )}
           </div>
         );
     }
@@ -234,7 +312,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
       {renderClock()}
 
       {/* 可调整大小的番茄计时器小窗 */}
-      {showMiniTimer && (
+      {showMiniTimer && !showPomodoroMode && (
         <div 
           className="mini-timer resizable-mini-timer"
           style={{
