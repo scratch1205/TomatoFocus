@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Clock, Settings, BarChart3, Music, Upload, Download, Play, Pause, RotateCcw, Plus, Edit, Trash2, Check, X, Calendar, Target, Maximize, Folder, FolderOpen } from 'lucide-react';
 import StatsPanel from './StatsPanel';
-import TaskManager from './TaskManager';
-import CalendarWidget from './CalendarWidget';
-import CountdownWidget from './CountdownWidget';
+import DraggableSidebar from './DraggableSidebar';
 import SettingsPanel from './SettingsPanel';
 import EditModal from './EditModal';
+import TaskGroupModal from './TaskGroupModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
 import Notification from './Notification';
 import FullscreenClock from './FullscreenClock';
-import TaskGroupModal from './TaskGroupModal';
 
 interface Task {
   id: number;
@@ -623,10 +621,6 @@ const PomodoroApp: React.FC = () => {
     return ((total - timeLeft) / total) * 283; // 283 is circumference for r=45
   };
 
-  const filteredTasks = selectedGroupId 
-    ? tasks.filter(task => task.groupId === selectedGroupId)
-    : tasks.filter(task => !task.groupId);
-
   return (
     <>
       {/* Hidden audio for notifications */}
@@ -748,96 +742,25 @@ const PomodoroApp: React.FC = () => {
           />
         </div>
 
-        {/* 侧边面板 */}
-        <div className={`tasks-container ${settings.enableGlassEffect ? 'glass-panel' : 'solid-panel'}`}>
-          {/* 任务集选择 */}
-          <div className="task-groups">
-            <div className="task-group-header">
-              <h3>任务集</h3>
-              <button 
-                className={`btn btn-sm btn-primary ${settings.enableAnimations ? 'animated-btn' : ''}`}
-                onClick={() => setShowTaskGroupModal(true)}
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="task-group-list">
-              <div 
-                className={`task-group-item ${selectedGroupId === null ? 'active' : ''}`}
-                onClick={() => setSelectedGroupId(null)}
-              >
-                <Folder size={16} />
-                <span>默认任务</span>
-                <span className="task-count">{tasks.filter(t => !t.groupId).length}</span>
-              </div>
-              {taskGroups.map(group => (
-                <div 
-                  key={group.id}
-                  className={`task-group-item ${selectedGroupId === group.id ? 'active' : ''}`}
-                  style={{ borderLeftColor: group.color }}
-                >
-                  <div className="task-group-main" onClick={() => setSelectedGroupId(group.id)}>
-                    <FolderOpen size={16} />
-                    <span>{group.name}</span>
-                    <span className="task-count">{tasks.filter(t => t.groupId === group.id).length}</span>
-                  </div>
-                  <button 
-                    className="task-group-delete"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteTaskGroup(group.id);
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <TaskManager
-            tasks={filteredTasks}
-            taskGroups={taskGroups}
-            selectedGroupId={selectedGroupId}
-            onAddTask={addTask}
-            onToggleTask={toggleTask}
-            onDeleteTask={deleteTask}
-            onEditTask={editTask}
-            glassEffect={settings.enableGlassEffect}
-            animations={settings.enableAnimations}
-          />
-          
-          {/* 早起打卡部分 */}
-          <div className={`checkin-section ${settings.enableGlassEffect ? 'glass-section' : 'solid-section'}`}>
-            <div className="checkin-header">
-              <div>
-                <h3>早起打卡</h3>
-                <div className="checkin-streak">
-                  <span>🔥 连续 {streak} 天</span>
-                </div>
-              </div>
-              <button
-                className={`checkin-btn ${settings.enableAnimations ? 'animated-btn' : ''}`}
-                onClick={handleCheckin}
-                disabled={todayCheckedIn}
-              >
-                {todayCheckedIn ? '已打卡' : '打卡'}
-              </button>
-            </div>
-          </div>
-          
-          {/* 目标倒计时组件 */}
-          <CountdownWidget 
-            glassEffect={settings.enableGlassEffect}
-            animations={settings.enableAnimations}
-          />
-          
-          <CalendarWidget 
-            checkins={checkins} 
-            glassEffect={settings.enableGlassEffect}
-            animations={settings.enableAnimations}
-          />
-        </div>
+        {/* 可拖拽的侧边栏 */}
+        <DraggableSidebar
+          tasks={tasks}
+          taskGroups={taskGroups}
+          selectedGroupId={selectedGroupId}
+          onAddTask={addTask}
+          onToggleTask={toggleTask}
+          onDeleteTask={deleteTask}
+          onEditTask={editTask}
+          onAddTaskGroup={addTaskGroup}
+          onDeleteTaskGroup={deleteTaskGroup}
+          onSelectGroup={setSelectedGroupId}
+          checkins={checkins}
+          todayCheckedIn={todayCheckedIn}
+          streak={streak}
+          onCheckin={handleCheckin}
+          glassEffect={settings.enableGlassEffect}
+          animations={settings.enableAnimations}
+        />
       </div>
 
       {/* 全屏翻页时钟 */}

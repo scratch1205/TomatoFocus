@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Calendar, Clock, Edit, Trash2, Plus, Star } from 'lucide-react';
+import { Target, Calendar, Clock, Edit, Trash2, Plus, Star, X } from 'lucide-react';
 
 interface CountdownEvent {
   id: number;
@@ -76,11 +76,6 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const generateRandomColor = () => {
-    const colors = Object.values(categoryColors);
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
 
   const addCountdown = (countdown: Omit<CountdownEvent, 'id' | 'created'>) => {
     const newCountdown: CountdownEvent = {
