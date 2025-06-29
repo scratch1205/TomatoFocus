@@ -6,6 +6,7 @@ interface AppSettings {
   enableGlassEffect: boolean;
   enableAnimations: boolean;
   clockStyle: 'digital' | 'flip' | 'analog';
+  colorTheme: 'blue' | 'white';
 }
 
 interface SettingsPanelProps {
@@ -100,6 +101,36 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 max="30"
               />
               <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>分钟</span>
+            </div>
+          </div>
+
+          <div className="setting-group" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <label className="setting-label" style={{ marginBottom: '15px' }}>
+              <span>颜色主题</span>
+            </label>
+            <div className="theme-selector">
+              <div 
+                className={`theme-option ${settings.colorTheme === 'blue' ? 'active' : ''}`}
+                onClick={() => updateSetting('colorTheme', 'blue')}
+              >
+                <div className="theme-preview blue-theme">
+                  <div className="theme-circle"></div>
+                  <div className="theme-circle"></div>
+                  <div className="theme-circle"></div>
+                </div>
+                <span>蓝色主题</span>
+              </div>
+              <div 
+                className={`theme-option ${settings.colorTheme === 'white' ? 'active' : ''}`}
+                onClick={() => updateSetting('colorTheme', 'white')}
+              >
+                <div className="theme-preview white-theme">
+                  <div className="theme-circle"></div>
+                  <div className="theme-circle"></div>
+                  <div className="theme-circle"></div>
+                </div>
+                <span>白色主题</span>
+              </div>
             </div>
           </div>
         </div>

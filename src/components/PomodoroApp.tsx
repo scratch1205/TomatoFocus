@@ -36,6 +36,7 @@ interface AppSettings {
   enableGlassEffect: boolean;
   enableAnimations: boolean;
   clockStyle: 'digital' | 'flip' | 'analog';
+  colorTheme: 'blue' | 'white';
 }
 
 interface AppData {
@@ -86,7 +87,8 @@ const PomodoroApp: React.FC = () => {
     enableFullscreen: false,
     enableGlassEffect: true,
     enableAnimations: true,
-    clockStyle: 'flip'
+    clockStyle: 'flip',
+    colorTheme: 'blue'
   });
 
   // Daily focus data for charts
@@ -95,6 +97,11 @@ const PomodoroApp: React.FC = () => {
   // Refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Apply color theme
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', settings.colorTheme);
+  }, [settings.colorTheme]);
 
   // Generate random color for tasks
   const generateRandomColor = () => {
@@ -132,7 +139,8 @@ const PomodoroApp: React.FC = () => {
           enableFullscreen: false,
           enableGlassEffect: true,
           enableAnimations: true,
-          clockStyle: 'flip'
+          clockStyle: 'flip',
+          colorTheme: 'blue'
         });
         setDailyFocusData(data.dailyFocusData || {});
         
@@ -441,6 +449,7 @@ const PomodoroApp: React.FC = () => {
 • 毛玻璃效果: ${settings.enableGlassEffect ? '开启' : '关闭'}
 • 动画效果: ${settings.enableAnimations ? '开启' : '关闭'}
 • 时钟样式: ${settings.clockStyle === 'digital' ? '数字时钟' : settings.clockStyle === 'flip' ? '翻页时钟' : '模拟时钟'}
+• 颜色主题: ${settings.colorTheme === 'blue' ? '蓝色主题' : '白色主题'}
 
 `;
 
@@ -590,7 +599,8 @@ const PomodoroApp: React.FC = () => {
             enableFullscreen: false,
             enableGlassEffect: true,
             enableAnimations: true,
-            clockStyle: 'flip'
+            clockStyle: 'flip',
+            colorTheme: 'blue'
           });
           setDailyFocusData(data.dailyFocusData || {});
           
