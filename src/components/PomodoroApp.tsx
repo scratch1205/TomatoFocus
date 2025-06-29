@@ -414,7 +414,154 @@ const PomodoroApp: React.FC = () => {
     link.download = `pomodoro-data-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    showNotificationMessage('数据已导出');
+    showNotificationMessage('JSON数据已导出');
+  };
+
+  const exportDataAsTxt = () => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('zh-CN');
+    const timeStr = now.toLocaleTimeString('zh-CN');
+    
+    let txtContent = `番茄钟专注系统 - 数据报告
+导出时间: ${dateStr} ${timeStr}
+========================================
+
+📊 统计概览
+----------------------------------------
+• 完成番茄钟: ${completedPomodoros} 个
+• 总专注时间: ${Math.floor(focusTime / 3600)}小时${Math.floor((focusTime % 3600) / 60)}分钟
+• 完成任务数: ${completedTasks} 个
+• 总任务数: ${tasks.length} 个
+• 任务完成率: ${tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0}%
+• 连续打卡: ${streak} 天
+
+⚙️ 当前设置
+----------------------------------------
+• 工作时间: ${Math.floor(workTime / 60)} 分钟
+• 休息时间: ${Math.floor(breakTime / 60)} 分钟
+• 毛玻璃效果: ${settings.enableGlassEffect ? '开启' : '关闭'}
+• 动画效果: ${settings.enableAnimations ? '开启' : '关闭'}
+• 时钟样式: ${settings.clockStyle === 'digital' ? '数字时钟' : settings.clockStyle === 'flip' ? '翻页时钟' : '模拟时钟'}
+
+`;
+
+    // 任务集信息
+    if (taskGroups.length > 0) {
+      txtContent += `📁 任务集列表 (${taskGroups.length}个)
+----------------------------------------
+`;
+      taskGroups.forEach((group, index) => {
+        const groupTasks = tasks.filter(task => task.groupId === group.id);
+        const completedGroupTasks = groupTasks.filter(task => task.completed).length;
+        txtContent += `${index + 1}. ${group.name}
+   • 任务数量: ${groupTasks.length}
+   • 已完成: ${completedGroupTasks}
+   • 完成率: ${groupTasks.length > 0 ? Math.round((completedGroupTasks / groupTasks.length) * 100) : 0}%
+   • 创建时间: ${new Date(group.created).toLocaleDateString('zh-CN')}
+
+`;
+      });
+    }
+
+    // 任务详情
+    txtContent += `📝 任务详情 (${tasks.length}个)
+----------------------------------------
+`;
+
+    // 默认任务
+    const defaultTasks = tasks.filter(task => !task.groupId);
+    if (defaultTasks.length > 0) {
+      txtContent += `【默认任务】
+`;
+      defaultTasks.forEach((task, index) => {
+        txtContent += `${index + 1}. ${task.completed ? '✅' : '⏳'} ${task.text}
+   • 状态: ${task.completed ? '已完成' : '进行中'}
+   • 创建时间: ${new Date(task.created).toLocaleDateString('zh-CN')} ${new Date(task.created).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+`;
+        if (task.completed && task.completedAt) {
+          txtContent += `   • 完成时间: ${new Date(task.completedAt).toLocaleDateString('zh-CN')} ${new Date(task.completedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+`;
+        }
+        txtContent += '\n';
+      });
+    }
+
+    // 任务集中的任务
+    taskGroups.forEach(group => {
+      const groupTasks = tasks.filter(task => task.groupId === group.id);
+      if (groupTasks.length > 0) {
+        txtContent += `【${group.name}】
+`;
+        groupTasks.forEach((task, index) => {
+          txtContent += `${index + 1}. ${task.completed ? '✅' : '⏳'} ${task.text}
+   • 状态: ${task.completed ? '已完成' : '进行中'}
+   • 创建时间: ${new Date(task.created).toLocaleDateString('zh-CN')} ${new Date(task.created).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+`;
+          if (task.completed && task.completedAt) {
+            txtContent += `   • 完成时间: ${new Date(task.completedAt).toLocaleDateString('zh-CN')} ${new Date(task.completedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+`;
+          }
+          txtContent += '\n';
+        });
+      }
+    });
+
+    // 打卡记录
+    if (checkins.length > 0) {
+      txtContent += `🌅 早起打卡记录 (${checkins.length}次)
+----------------------------------------
+`;
+      // 按日期排序，最新的在前
+      const sortedCheckins = [...checkins].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      sortedCheckins.forEach((checkin, index) => {
+        const checkinDate = new Date(checkin.date);
+        txtContent += `${index + 1}. ${checkinDate.toLocaleDateString('zh-CN')} ${checkin.time}
+`;
+      });
+      txtContent += '\n';
+    }
+
+    // 每日专注数据
+    const focusDataEntries = Object.entries(dailyFocusData).filter(([_, minutes]) => minutes > 0);
+    if (focusDataEntries.length > 0) {
+      txtContent += `📈 每日专注时间记录
+----------------------------------------
+`;
+      // 按日期排序
+      focusDataEntries
+        .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+        .forEach(([dateStr, seconds]) => {
+          const date = new Date(dateStr);
+          const minutes = Math.floor(seconds / 60);
+          const hours = Math.floor(minutes / 60);
+          const remainingMinutes = minutes % 60;
+          
+          let timeStr = '';
+          if (hours > 0) {
+            timeStr = `${hours}小时${remainingMinutes}分钟`;
+          } else {
+            timeStr = `${remainingMinutes}分钟`;
+          }
+          
+          txtContent += `• ${date.toLocaleDateString('zh-CN')}: ${timeStr}
+`;
+        });
+    }
+
+    txtContent += `
+========================================
+导出完成 - 番茄钟专注系统
+感谢使用！继续保持专注！🍅
+`;
+
+    const dataBlob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `番茄钟数据报告-${new Date().toISOString().split('T')[0]}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showNotificationMessage('TXT报告已导出');
   };
 
   const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -707,6 +854,7 @@ const PomodoroApp: React.FC = () => {
         onBreakTimeChange={(minutes) => setBreakTime(minutes * 60)}
         onSettingsChange={setSettings}
         onExport={exportData}
+        onExportTxt={exportDataAsTxt}
         onImport={importData}
         onClose={() => setShowSettings(false)}
       />

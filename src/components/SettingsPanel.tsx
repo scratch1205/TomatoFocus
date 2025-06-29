@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, Download, Upload, Monitor, Sparkles, Eye } from 'lucide-react';
+import { Settings, Download, Upload, Monitor, Sparkles, Eye, FileText } from 'lucide-react';
 
 interface AppSettings {
   enableFullscreen: boolean;
@@ -17,6 +17,7 @@ interface SettingsPanelProps {
   onBreakTimeChange: (minutes: number) => void;
   onSettingsChange: (settings: AppSettings) => void;
   onExport: () => void;
+  onExportTxt: () => void;
   onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
 }
@@ -30,6 +31,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onBreakTimeChange,
   onSettingsChange,
   onExport,
+  onExportTxt,
   onImport,
   onClose
 }) => {
@@ -178,11 +180,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       <div className="setting-section">
         <h3 className="section-title">数据管理</h3>
         
-        <div className="timer-controls">
+        <div className="export-buttons">
           <button className="btn btn-outline" onClick={onExport}>
             <Download size={16} />
-            <span>导出数据</span>
+            <span>导出JSON</span>
           </button>
+          <button className="btn btn-outline" onClick={onExportTxt}>
+            <FileText size={16} />
+            <span>导出TXT</span>
+          </button>
+        </div>
+        
+        <div className="import-section">
           <button className="btn btn-outline" onClick={handleImportClick}>
             <Upload size={16} />
             <span>导入数据</span>

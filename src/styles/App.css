@@ -570,6 +570,18 @@ body {
   cursor: pointer;
 }
 
+/* 数据管理按钮样式 */
+.export-buttons {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.import-section {
+  display: flex;
+  justify-content: center;
+}
+
 /* 待办事项样式 */
 .tasks-container {
   background: var(--glass);
@@ -1719,6 +1731,11 @@ body {
   }
 
   .task-group-main {
+    gap: 10px;
+  }
+
+  .export-buttons {
+    flex-direction: column;
     gap: 10px;
   }
 }
