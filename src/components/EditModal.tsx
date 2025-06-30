@@ -1,28 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check } from 'lucide-react';
-
-interface Task {
-  id: number;
-  text: string;
-  completed: boolean;
-  created: Date;
-  completedAt: Date | null;
-}
+import { Task, Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 interface EditModalProps {
   show: boolean;
   task: Task | null;
   onSave: (text: string) => void;
   onClose: () => void;
+  language: Language;
 }
 
 const EditModal: React.FC<EditModalProps> = ({
   show,
   task,
   onSave,
-  onClose
+  onClose,
+  language
 }) => {
   const [text, setText] = useState('');
+  const t = useTranslation(language);
 
   useEffect(() => {
     if (task) {
@@ -55,24 +52,24 @@ const EditModal: React.FC<EditModalProps> = ({
   return (
     <div className={`edit-modal ${show ? 'active' : ''}`}>
       <div className="edit-content">
-        <h2 className="edit-title">编辑任务</h2>
+        <h2 className="edit-title">{t.editTask}</h2>
         <input
           type="text"
           className="edit-input"
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="输入任务内容"
+          placeholder={language === 'en' ? 'Enter task content' : '输入任务内容'}
           autoFocus
         />
         <div className="edit-buttons">
           <button className="btn btn-outline" onClick={handleClose}>
             <X size={16} />
-            <span>取消</span>
+            <span>{t.cancel}</span>
           </button>
           <button className="btn btn-primary" onClick={handleSave}>
             <Check size={16} />
-            <span>保存</span>
+            <span>{t.save}</span>
           </button>
         </div>
       </div>

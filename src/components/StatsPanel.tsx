@@ -11,6 +11,8 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
+import { Task, CheckinData, Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 ChartJS.register(
   CategoryScale,
@@ -22,21 +24,6 @@ ChartJS.register(
   ArcElement
 );
 
-interface Task {
-  id: number;
-  text: string;
-  completed: boolean;
-  created: Date;
-  completedAt: Date | null;
-  color: string;
-  groupId?: number;
-}
-
-interface CheckinData {
-  date: string;
-  time: string;
-}
-
 interface StatsPanelProps {
   completedPomodoros: number;
   completedTasks: number;
@@ -46,6 +33,7 @@ interface StatsPanelProps {
   dailyFocusData: { [key: string]: number };
   glassEffect: boolean;
   animations: boolean;
+  language: Language;
 }
 
 const StatsPanel: React.FC<StatsPanelProps> = ({
@@ -56,13 +44,17 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   checkins,
   dailyFocusData,
   glassEffect,
-  animations
+  animations,
+  language
 }) => {
   const [chartType, setChartType] = useState<'bar' | 'pie'>('bar');
+  const t = useTranslation(language);
 
   // Generate weekly focus data from real data
   const getWeeklyFocusData = () => {
-    const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const days = language === 'en' 
+      ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      : ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     const data = Array(7).fill(0);
     
     // Get last 7 days
@@ -78,7 +70,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
       labels: days,
       datasets: [
         {
-          label: '专注时间（分钟）',
+          label: `${t.focusTime}（${t.minutes}）`,
           data: data,
           backgroundColor: 'rgba(67, 97, 238, 0.8)',
           borderColor: 'rgba(67, 97, 238, 1)',
@@ -95,7 +87,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
     const pending = tasks.length - completed;
     
     return {
-      labels: ['已完成', '进行中'],
+      labels: [t.completedTasks, language === 'en' ? 'Pending' : '进行中'],
       datasets: [
         {
           data: [completed, pending],
@@ -145,20 +137,20 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
 
   return (
     <div className={`data-panel ${glassEffect ? 'glass-panel' : 'solid-panel'}`}>
-      <h2><TrendingUp size={20} /> 专注数据分析</h2>
+      <h2><TrendingUp size={20} /> {t.dataAnalysis}</h2>
       
       <div className="stats-container">
         <div className={`stat-card ${animations ? 'animated-card' : ''}`}>
           <div className="stat-value">{completedPomodoros}</div>
-          <div className="stat-label">今日番茄</div>
+          <div className="stat-label">{t.todayPomodoros}</div>
         </div>
         <div className={`stat-card ${animations ? 'animated-card' : ''}`}>
           <div className="stat-value">{completedTasks}</div>
-          <div className="stat-label">完成任务</div>
+          <div className="stat-label">{t.completedTasks}</div>
         </div>
         <div className={`stat-card ${animations ? 'animated-card' : ''}`}>
           <div className="stat-value">{Math.floor(focusTime / 60)}m</div>
-          <div className="stat-label">专注时间</div>
+          <div className="stat-label">{t.focusTime}</div>
         </div>
       </div>
 
@@ -168,14 +160,14 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
           onClick={() => setChartType('bar')}
         >
           <BarChart3 size={16} />
-          <span>柱状图</span>
+          <span>{t.barChart}</span>
         </button>
         <button
           className={`chart-tab ${chartType === 'pie' ? 'active' : ''} ${animations ? 'animated-btn' : ''}`}
           onClick={() => setChartType('pie')}
         >
           <PieChart size={16} />
-          <span>饼图</span>
+          <span>{t.pieChart}</span>
         </button>
       </div>
 

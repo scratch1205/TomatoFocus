@@ -3,28 +3,8 @@ import { GripVertical } from 'lucide-react';
 import TaskManager from './TaskManager';
 import CalendarWidget from './CalendarWidget';
 import CountdownWidget from './CountdownWidget';
-
-interface Task {
-  id: number;
-  text: string;
-  completed: boolean;
-  created: Date;
-  completedAt: Date | null;
-  color: string;
-  groupId?: number;
-}
-
-interface TaskGroup {
-  id: number;
-  name: string;
-  color: string;
-  created: Date;
-}
-
-interface CheckinData {
-  date: string;
-  time: string;
-}
+import { Task, TaskGroup, CheckinData, Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 interface SidebarComponent {
   id: string;
@@ -49,6 +29,7 @@ interface DraggableSidebarProps {
   onCheckin: () => void;
   glassEffect: boolean;
   animations: boolean;
+  language: Language;
 }
 
 const DraggableSidebar: React.FC<DraggableSidebarProps> = ({
@@ -67,12 +48,14 @@ const DraggableSidebar: React.FC<DraggableSidebarProps> = ({
   streak,
   onCheckin,
   glassEffect,
-  animations
+  animations,
+  language
 }) => {
   const [componentOrder, setComponentOrder] = useState(['tasks', 'countdown', 'checkin', 'calendar']);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dragOverItem, setDragOverItem] = useState<string | null>(null);
   const dragRef = useRef<HTMLDivElement>(null);
+  const t = useTranslation(language);
 
   // 保存组件顺序到localStorage
   useEffect(() => {
@@ -134,7 +117,7 @@ const DraggableSidebar: React.FC<DraggableSidebarProps> = ({
     const allComponents: { [key: string]: SidebarComponent } = {
       tasks: {
         id: 'tasks',
-        name: '待办事项',
+        name: t.tasks,
         component: (
           <TaskManager
             tasks={tasks}
@@ -149,29 +132,31 @@ const DraggableSidebar: React.FC<DraggableSidebarProps> = ({
             onSelectGroup={onSelectGroup}
             glassEffect={glassEffect}
             animations={animations}
+            language={language}
           />
         )
       },
       countdown: {
         id: 'countdown',
-        name: '目标倒计时',
+        name: t.targetCountdown,
         component: (
           <CountdownWidget
             glassEffect={glassEffect}
             animations={animations}
+            language={language}
           />
         )
       },
       checkin: {
         id: 'checkin',
-        name: '早起打卡',
+        name: t.checkin,
         component: (
           <div className={`checkin-section ${glassEffect ? 'glass-section' : 'solid-section'}`}>
             <div className="checkin-header">
               <div>
-                <h3>早起打卡</h3>
+                <h3>{t.checkin}</h3>
                 <div className="checkin-streak">
-                  <span>🔥 连续 {streak} 天</span>
+                  <span>🔥 {t.streak} {streak} {t.days}</span>
                 </div>
               </div>
               <button
@@ -179,7 +164,7 @@ const DraggableSidebar: React.FC<DraggableSidebarProps> = ({
                 onClick={onCheckin}
                 disabled={todayCheckedIn}
               >
-                {todayCheckedIn ? '已打卡' : '打卡'}
+                {todayCheckedIn ? t.checkedIn : t.checkin}
               </button>
             </div>
           </div>
@@ -187,12 +172,13 @@ const DraggableSidebar: React.FC<DraggableSidebarProps> = ({
       },
       calendar: {
         id: 'calendar',
-        name: '日历',
+        name: t.calendar,
         component: (
           <CalendarWidget 
             checkins={checkins} 
             glassEffect={glassEffect}
             animations={animations}
+            language={language}
           />
         )
       }

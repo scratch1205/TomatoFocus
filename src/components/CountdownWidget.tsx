@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Target, Calendar, Clock, Edit, Trash2, Plus, Star, X } from 'lucide-react';
+import { Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 interface CountdownEvent {
   id: number;
@@ -14,21 +16,23 @@ interface CountdownEvent {
 interface CountdownWidgetProps {
   glassEffect: boolean;
   animations: boolean;
+  language: Language;
 }
 
-const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animations }) => {
+const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animations, language }) => {
   const [countdowns, setCountdowns] = useState<CountdownEvent[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCountdown, setEditingCountdown] = useState<CountdownEvent | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const t = useTranslation(language);
 
   // 预设的励志目标
-  const presetGoals = [
-    { title: '高考倒计时', description: '为梦想大学冲刺！', category: 'exam' as const, days: 100 },
-    { title: '考研倒计时', description: '研究生入学考试', category: 'exam' as const, days: 200 },
-    { title: '项目截止日', description: '重要项目交付', category: 'work' as const, days: 30 },
-    { title: '新年目标', description: '新的一年，新的开始', category: 'personal' as const, days: 365 },
-    { title: '春节回家', description: '与家人团聚的日子', category: 'holiday' as const, days: 60 },
+  const getPresetGoals = () => [
+    { title: t.examCountdown, description: t.examCountdownDesc, category: 'exam' as const, days: 100 },
+    { title: t.graduateExam, description: t.graduateExamDesc, category: 'exam' as const, days: 200 },
+    { title: t.projectDeadline, description: t.projectDeadlineDesc, category: 'work' as const, days: 30 },
+    { title: t.newYearGoal, description: t.newYearGoalDesc, category: 'personal' as const, days: 365 },
+    { title: t.springFestival, description: t.springFestivalDesc, category: 'holiday' as const, days: 60 },
   ];
 
   const categoryColors = {
@@ -45,6 +49,16 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
     personal: '🎯',
     holiday: '🎉',
     other: '⭐'
+  };
+
+  const getCategoryName = (category: string) => {
+    switch (category) {
+      case 'exam': return t.exam;
+      case 'work': return t.work;
+      case 'personal': return t.personal;
+      case 'holiday': return t.holiday;
+      default: return t.other;
+    }
   };
 
   // 加载数据
@@ -123,7 +137,7 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
     return { days, hours, minutes, seconds, isExpired: false };
   };
 
-  const addPresetGoal = (preset: typeof presetGoals[0]) => {
+  const addPresetGoal = (preset: ReturnType<typeof getPresetGoals>[0]) => {
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + preset.days);
     
@@ -157,7 +171,7 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
         <div className="countdown-header">
           <h3>
             <Target size={20} />
-            <span>目标倒计时</span>
+            <span>{t.targetCountdown}</span>
           </h3>
           <button 
             className={`btn btn-sm btn-primary ${animations ? 'animated-btn' : ''}`}
@@ -170,9 +184,9 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
         {/* 快速添加预设目标 */}
         {countdowns.length === 0 && (
           <div className="preset-goals">
-            <div className="preset-title">快速添加目标：</div>
+            <div className="preset-title">{language === 'en' ? 'Quick add goals:' : '快速添加目标：'}</div>
             <div className="preset-grid">
-              {presetGoals.map((preset, index) => (
+              {getPresetGoals().map((preset, index) => (
                 <button
                   key={index}
                   className={`preset-goal-btn ${animations ? 'animated-btn' : ''}`}
@@ -182,7 +196,7 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
                   <span className="preset-icon">{categoryIcons[preset.category]}</span>
                   <div className="preset-info">
                     <div className="preset-name">{preset.title}</div>
-                    <div className="preset-desc">{preset.days}天后</div>
+                    <div className="preset-desc">{preset.days}{t.days}{language === 'en' ? ' later' : '后'}</div>
                   </div>
                 </button>
               ))}
@@ -208,33 +222,33 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
                     </div>
                     <div className="countdown-description">{countdown.description}</div>
                     <div className="countdown-target-date">
-                      目标时间: {countdown.targetDate.toLocaleDateString('zh-CN')} {countdown.targetDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                      {t.targetTime}: {countdown.targetDate.toLocaleDateString(language === 'en' ? 'en-US' : 'zh-CN')} {countdown.targetDate.toLocaleTimeString(language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                   
                   <div className="countdown-display">
                     {timeLeft.isExpired ? (
-                      <div className="expired-badge">已到期</div>
+                      <div className="expired-badge">{t.expired}</div>
                     ) : (
                       <div className="time-blocks">
                         <div className="time-block">
                           <div className="time-value">{timeLeft.days}</div>
-                          <div className="time-label">天</div>
+                          <div className="time-label">{t.days}</div>
                         </div>
                         <div className="time-separator">:</div>
                         <div className="time-block">
                           <div className="time-value">{timeLeft.hours.toString().padStart(2, '0')}</div>
-                          <div className="time-label">时</div>
+                          <div className="time-label">{t.hours}</div>
                         </div>
                         <div className="time-separator">:</div>
                         <div className="time-block">
                           <div className="time-value">{timeLeft.minutes.toString().padStart(2, '0')}</div>
-                          <div className="time-label">分</div>
+                          <div className="time-label">{t.mins}</div>
                         </div>
                         <div className="time-separator">:</div>
                         <div className="time-block">
                           <div className="time-value">{timeLeft.seconds.toString().padStart(2, '0')}</div>
-                          <div className="time-label">秒</div>
+                          <div className="time-label">{t.secs}</div>
                         </div>
                       </div>
                     )}
@@ -245,14 +259,14 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
                   <button
                     className="countdown-btn"
                     onClick={() => editCountdown(countdown)}
-                    title="编辑"
+                    title={t.edit}
                   >
                     <Edit size={16} />
                   </button>
                   <button
                     className="countdown-btn"
                     onClick={() => deleteCountdown(countdown.id)}
-                    title="删除"
+                    title={t.delete}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -264,8 +278,8 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
           {countdowns.length === 0 && (
             <div className="empty-state">
               <Star size={48} />
-              <div className="empty-title">还没有设定目标</div>
-              <div className="empty-desc">添加一个倒计时来激励自己吧！</div>
+              <div className="empty-title">{language === 'en' ? 'No goals set yet' : '还没有设定目标'}</div>
+              <div className="empty-desc">{language === 'en' ? 'Add a countdown to motivate yourself!' : '添加一个倒计时来激励自己吧！'}</div>
             </div>
           )}
         </div>
@@ -280,6 +294,7 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
           setShowAddModal(false);
           setEditingCountdown(null);
         }}
+        language={language}
       />
     </>
   );
@@ -291,19 +306,22 @@ interface CountdownModalProps {
   countdown: CountdownEvent | null;
   onSave: (countdown: Omit<CountdownEvent, 'id' | 'created'>) => void;
   onClose: () => void;
+  language: Language;
 }
 
 const CountdownModal: React.FC<CountdownModalProps> = ({
   show,
   countdown,
   onSave,
-  onClose
+  onClose,
+  language
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [targetTime, setTargetTime] = useState('');
   const [category, setCategory] = useState<CountdownEvent['category']>('personal');
+  const t = useTranslation(language);
 
   const categoryColors = {
     exam: '#ff6b6b',
@@ -311,6 +329,16 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
     personal: '#45b7d1',
     holiday: '#f39c12',
     other: '#9b59b6'
+  };
+
+  const getCategoryName = (cat: string) => {
+    switch (cat) {
+      case 'exam': return `📚 ${t.exam}`;
+      case 'work': return `💼 ${t.work}`;
+      case 'personal': return `🎯 ${t.personal}`;
+      case 'holiday': return `🎉 ${t.holiday}`;
+      default: return `⭐ ${t.other}`;
+    }
   };
 
   useEffect(() => {
@@ -358,37 +386,37 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
       <div className="edit-content countdown-modal">
         <h2 className="edit-title">
           <Target size={24} />
-          <span>{countdown ? '编辑倒计时' : '添加倒计时'}</span>
+          <span>{countdown ? t.editCountdown : t.addCountdown}</span>
         </h2>
         
         <div className="form-group">
-          <label>目标标题</label>
+          <label>{t.goalTitle}</label>
           <input
             type="text"
             className="edit-input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder="输入目标标题"
+            placeholder={language === 'en' ? 'Enter goal title' : '输入目标标题'}
             autoFocus
           />
         </div>
 
         <div className="form-group">
-          <label>目标描述</label>
+          <label>{t.goalDescription}</label>
           <input
             type="text"
             className="edit-input"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder="输入目标描述（可选）"
+            placeholder={language === 'en' ? 'Enter goal description (optional)' : '输入目标描述（可选）'}
           />
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>目标日期</label>
+            <label>{t.targetDate}</label>
             <input
               type="date"
               className="edit-input"
@@ -398,7 +426,7 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
             />
           </div>
           <div className="form-group">
-            <label>目标时间</label>
+            <label>{t.targetTime}</label>
             <input
               type="time"
               className="edit-input"
@@ -409,7 +437,7 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
         </div>
 
         <div className="form-group">
-          <label>目标类型</label>
+          <label>{t.goalType}</label>
           <div className="category-grid">
             {Object.entries(categoryColors).map(([cat, color]) => (
               <button
@@ -418,13 +446,7 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
                 onClick={() => setCategory(cat as CountdownEvent['category'])}
                 style={{ borderColor: color, backgroundColor: category === cat ? `${color}20` : 'transparent' }}
               >
-                <span style={{ color }}>{
-                  cat === 'exam' ? '📚 考试' :
-                  cat === 'work' ? '💼 工作' :
-                  cat === 'personal' ? '🎯 个人' :
-                  cat === 'holiday' ? '🎉 节日' :
-                  '⭐ 其他'
-                }</span>
+                <span style={{ color }}>{getCategoryName(cat)}</span>
               </button>
             ))}
           </div>
@@ -433,11 +455,11 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
         <div className="edit-buttons">
           <button className="btn btn-outline" onClick={onClose}>
             <X size={16} />
-            <span>取消</span>
+            <span>{t.cancel}</span>
           </button>
           <button className="btn btn-primary" onClick={handleSave}>
             <Target size={16} />
-            <span>{countdown ? '更新' : '添加'}</span>
+            <span>{countdown ? t.update : t.add}</span>
           </button>
         </div>
       </div>

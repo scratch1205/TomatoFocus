@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { X, Check, Folder } from 'lucide-react';
+import { Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 interface TaskGroupModalProps {
   show: boolean;
   onSave: (name: string) => void;
   onClose: () => void;
+  language: Language;
 }
 
 const TaskGroupModal: React.FC<TaskGroupModalProps> = ({
   show,
   onSave,
-  onClose
+  onClose,
+  language
 }) => {
   const [name, setName] = useState('');
+  const t = useTranslation(language);
 
   const handleSave = () => {
     if (name.trim()) {
@@ -42,7 +47,7 @@ const TaskGroupModal: React.FC<TaskGroupModalProps> = ({
       <div className="edit-content">
         <h2 className="edit-title">
           <Folder size={24} />
-          <span>创建任务集</span>
+          <span>{t.createTaskGroup}</span>
         </h2>
         <input
           type="text"
@@ -50,17 +55,17 @@ const TaskGroupModal: React.FC<TaskGroupModalProps> = ({
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="输入任务集名称"
+          placeholder={t.taskGroupName}
           autoFocus
         />
         <div className="edit-buttons">
           <button className="btn btn-outline" onClick={handleClose}>
             <X size={16} />
-            <span>取消</span>
+            <span>{t.cancel}</span>
           </button>
           <button className="btn btn-primary" onClick={handleSave}>
             <Check size={16} />
-            <span>创建</span>
+            <span>{t.create}</span>
           </button>
         </div>
       </div>

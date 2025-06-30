@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
-
-interface CheckinData {
-  date: string;
-  time: string;
-}
+import { CheckinData, Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 interface CalendarWidgetProps {
   checkins: CheckinData[];
   glassEffect: boolean;
   animations: boolean;
+  language: Language;
 }
 
-const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins, glassEffect, animations }) => {
+const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins, glassEffect, animations, language }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
   const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
+  const t = useTranslation(language);
 
   const renderCalendar = () => {
     const firstDay = new Date(currentYear, currentMonth, 1);
@@ -91,16 +90,31 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins, glassEffect, 
     setCurrentYear(today.getFullYear());
   };
 
-  const monthNames = [
-    '1月', '2月', '3月', '4月', '5月', '6月',
-    '7月', '8月', '9月', '10月', '11月', '12月'
-  ];
+  const getMonthNames = () => {
+    if (language === 'en') {
+      return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    }
+    return [t.january, t.february, t.march, t.april, t.may, t.june, t.july, t.august, t.september, t.october, t.november, t.december];
+  };
+
+  const getWeekdayNames = () => {
+    if (language === 'en') {
+      return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    }
+    return [t.sunday, t.monday, t.tuesday, t.wednesday, t.thursday, t.friday, t.saturday];
+  };
+
+  const monthNames = getMonthNames();
+  const weekdayNames = getWeekdayNames();
 
   return (
     <div className={`calendar-widget ${glassEffect ? 'glass-calendar' : 'solid-calendar'}`}>
       <div className="calendar-header">
         <div className="calendar-title">
-          {currentYear}年{monthNames[currentMonth]}
+          {language === 'en' 
+            ? `${monthNames[currentMonth]} ${currentYear}`
+            : `${currentYear}年${monthNames[currentMonth]}`
+          }
         </div>
         <div className="calendar-nav">
           <button 
@@ -113,7 +127,7 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins, glassEffect, 
             className={`calendar-nav-btn ${animations ? 'animated-btn' : ''}`} 
             onClick={goToToday}
           >
-            今天
+            {t.today}
           </button>
           <button 
             className={`calendar-nav-btn ${animations ? 'animated-btn' : ''}`} 
@@ -125,13 +139,9 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ checkins, glassEffect, 
       </div>
 
       <div className="calendar-weekdays">
-        <div>日</div>
-        <div>一</div>
-        <div>二</div>
-        <div>三</div>
-        <div>四</div>
-        <div>五</div>
-        <div>六</div>
+        {weekdayNames.map((day, index) => (
+          <div key={index}>{day}</div>
+        ))}
       </div>
 
       <div className="calendar-days">

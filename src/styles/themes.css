@@ -1,0 +1,140 @@
+/* Color Theme Variables */
+:root[data-theme="blue"] {
+  --primary: #4361ee;
+  --primary-light: #7209b7;
+  --primary-dark: #3f37c9;
+  --secondary: #4cc9f0;
+  --accent: #7209b7;
+  --work: #4cc9f0;
+  --break: #f72585;
+  --success: #06ffa5;
+  --warning: #ffbe0b;
+  --error: #fb8500;
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-light: rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="white"] {
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --secondary: #06b6d4;
+  --accent: #8b5cf6;
+  --work: #06b6d4;
+  --break: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-light: rgba(0, 0, 0, 0.05);
+}
+
+:root[data-theme="green"] {
+  --primary: #059669;
+  --primary-light: #10b981;
+  --primary-dark: #047857;
+  --secondary: #06b6d4;
+  --accent: #8b5cf6;
+  --work: #10b981;
+  --break: #f59e0b;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%);
+  --glass-bg: rgba(255, 255, 255, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --text-primary: #064e3b;
+  --text-secondary: #065f46;
+  --text-muted: #047857;
+  --shadow: rgba(0, 0, 0, 0.15);
+  --shadow-light: rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="purple"] {
+  --primary: #7c3aed;
+  --primary-light: #8b5cf6;
+  --primary-dark: #6d28d9;
+  --secondary: #ec4899;
+  --accent: #06b6d4;
+  --work: #8b5cf6;
+  --break: #f59e0b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 50%, #c4b5fd 100%);
+  --glass-bg: rgba(255, 255, 255, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --text-primary: #581c87;
+  --text-secondary: #6b21a8;
+  --text-muted: #7c2d92;
+  --shadow: rgba(0, 0, 0, 0.15);
+  --shadow-light: rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="orange"] {
+  --primary: #ea580c;
+  --primary-light: #f97316;
+  --primary-dark: #c2410c;
+  --secondary: #06b6d4;
+  --accent: #8b5cf6;
+  --work: #f97316;
+  --break: #06b6d4;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --background: linear-gradient(135deg, #fed7aa 0%, #fdba74 50%, #fb923c 100%);
+  --glass-bg: rgba(255, 255, 255, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --text-primary: #9a3412;
+  --text-secondary: #c2410c;
+  --text-muted: #ea580c;
+  --shadow: rgba(0, 0, 0, 0.15);
+  --shadow-light: rgba(0, 0, 0, 0.08);
+}
+
+/* Dark mode adjustments for light themes */
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="white"] {
+    --background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text-primary: #f8fafc;
+    --text-secondary: #e2e8f0;
+    --text-muted: #cbd5e1;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-light: rgba(0, 0, 0, 0.15);
+  }
+  
+  :root[data-theme="green"] {
+    --background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+    --text-primary: #d1fae5;
+    --text-secondary: #a7f3d0;
+    --text-muted: #6ee7b7;
+  }
+  
+  :root[data-theme="purple"] {
+    --background: linear-gradient(135deg, #581c87 0%, #6b21a8 50%, #7c2d92 100%);
+    --text-primary: #ede9fe;
+    --text-secondary: #ddd6fe;
+    --text-muted: #c4b5fd;
+  }
+  
+  :root[data-theme="orange"] {
+    --background: linear-gradient(135deg, #9a3412 0%, #c2410c 50%, #ea580c 100%);
+    --text-primary: #fed7aa;
+    --text-secondary: #fdba74;
+    --text-muted: #fb923c;
+  }
+}

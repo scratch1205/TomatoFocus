@@ -1,12 +1,7 @@
 import React from 'react';
-import { Settings, Download, Upload, Monitor, Sparkles, Eye, FileText, Clock, Palette, Database } from 'lucide-react';
-
-interface AppSettings {
-  enableFullscreen: boolean;
-  enableGlassEffect: boolean;
-  enableAnimations: boolean;
-  clockStyle: 'digital' | 'flip' | 'analog';
-}
+import { Settings, Download, Upload, Monitor, Sparkles, Eye, FileText, Clock, Palette, Database, Globe } from 'lucide-react';
+import { AppSettings, Language, ColorTheme } from '../types';
+import { useTranslation, getAvailableLanguages } from '../utils/i18n';
 
 interface SettingsPanelProps {
   show: boolean;
@@ -20,6 +15,7 @@ interface SettingsPanelProps {
   onExportTxt: () => void;
   onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
+  language: Language;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
@@ -33,8 +29,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onExport,
   onExportTxt,
   onImport,
-  onClose
+  onClose,
+  language
 }) => {
+  const t = useTranslation(language);
+  const availableLanguages = getAvailableLanguages();
+
   const handleImportClick = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -50,13 +50,21 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     });
   };
 
+  const colorThemes: { id: ColorTheme; name: string; preview: string }[] = [
+    { id: 'blue', name: t.blueTheme, preview: 'blue-theme' },
+    { id: 'white', name: t.whiteTheme, preview: 'white-theme' },
+    { id: 'green', name: t.greenTheme, preview: 'green-theme' },
+    { id: 'purple', name: t.purpleTheme, preview: 'purple-theme' },
+    { id: 'orange', name: t.orangeTheme, preview: 'orange-theme' }
+  ];
+
   return (
     <div className={`settings-panel ${show ? 'active' : ''}`}>
       {/* 设置面板头部 */}
       <div className="settings-panel-header">
         <h2 className="panel-title">
           <Settings size={24} />
-          <span>系统设置</span>
+          <span>{t.settings}</span>
         </h2>
       </div>
 
@@ -66,12 +74,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <div className="setting-section">
           <h3 className="section-title">
             <Clock size={20} />
-            <span>番茄钟设置</span>
+            <span>{t.pomodoroSettings}</span>
           </h3>
           
           <div className="setting-group">
             <label className="setting-label">
-              <span>工作时间</span>
+              <span>{t.workTime}</span>
             </label>
             <div className="input-group">
               <input
@@ -82,13 +90,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 min="1"
                 max="60"
               />
-              <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>分钟</span>
+              <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>{t.minutes}</span>
             </div>
           </div>
 
           <div className="setting-group">
             <label className="setting-label">
-              <span>休息时间</span>
+              <span>{t.breakTime}</span>
             </label>
             <div className="input-group">
               <input
@@ -99,7 +107,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 min="1"
                 max="30"
               />
-              <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>分钟</span>
+              <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>{t.minutes}</span>
             </div>
           </div>
         </div>
@@ -108,13 +116,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <div className="setting-section">
           <h3 className="section-title">
             <Palette size={20} />
-            <span>界面设置</span>
+            <span>{t.interfaceSettings}</span>
           </h3>
           
           <div className="setting-group">
             <label className="setting-label">
               <Monitor size={18} />
-              <span>浏览器全屏</span>
+              <span>{t.fullscreen}</span>
             </label>
             <div className="toggle-switch">
               <input
@@ -129,7 +137,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <div className="setting-group">
             <label className="setting-label">
               <Eye size={18} />
-              <span>毛玻璃效果</span>
+              <span>{t.glassEffect}</span>
             </label>
             <div className="toggle-switch">
               <input
@@ -144,7 +152,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <div className="setting-group">
             <label className="setting-label">
               <Sparkles size={18} />
-              <span>动画效果</span>
+              <span>{t.animations}</span>
             </label>
             <div className="toggle-switch">
               <input
@@ -158,7 +166,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
           <div className="setting-group" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
             <label className="setting-label" style={{ marginBottom: '15px' }}>
-              <span>全屏时钟样式</span>
+              <span>{t.clockStyle}</span>
             </label>
             <div className="radio-group">
               <label className="radio-option">
@@ -169,7 +177,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   checked={settings.clockStyle === 'digital'}
                   onChange={(e) => updateSetting('clockStyle', e.target.value)}
                 />
-                <span>数字时钟</span>
+                <span>{t.digitalClock}</span>
               </label>
               <label className="radio-option">
                 <input
@@ -179,7 +187,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   checked={settings.clockStyle === 'flip'}
                   onChange={(e) => updateSetting('clockStyle', e.target.value)}
                 />
-                <span>翻页时钟</span>
+                <span>{t.flipClock}</span>
               </label>
               <label className="radio-option">
                 <input
@@ -189,8 +197,48 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   checked={settings.clockStyle === 'analog'}
                   onChange={(e) => updateSetting('clockStyle', e.target.value)}
                 />
-                <span>模拟时钟</span>
+                <span>{t.analogClock}</span>
               </label>
+            </div>
+          </div>
+
+          <div className="setting-group" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <label className="setting-label" style={{ marginBottom: '15px' }}>
+              <span>{t.colorTheme}</span>
+            </label>
+            <div className="theme-selector">
+              {colorThemes.map((theme) => (
+                <div 
+                  key={theme.id}
+                  className={`theme-option ${settings.colorTheme === theme.id ? 'active' : ''}`}
+                  onClick={() => updateSetting('colorTheme', theme.id)}
+                >
+                  <div className={`theme-preview ${theme.preview}`}>
+                    <div className="theme-circle"></div>
+                    <div className="theme-circle"></div>
+                    <div className="theme-circle"></div>
+                  </div>
+                  <span>{theme.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="setting-group" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <label className="setting-label" style={{ marginBottom: '15px' }}>
+              <Globe size={18} />
+              <span>{t.language}</span>
+            </label>
+            <div className="language-selector">
+              {availableLanguages.map((lang) => (
+                <div
+                  key={lang.code}
+                  className={`language-option ${settings.language === lang.code ? 'active' : ''}`}
+                  onClick={() => updateSetting('language', lang.code)}
+                >
+                  {lang.name}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -199,24 +247,24 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <div className="setting-section">
           <h3 className="section-title">
             <Database size={20} />
-            <span>数据管理</span>
+            <span>{t.dataManagement}</span>
           </h3>
           
           <div className="export-buttons">
             <button className="btn btn-outline" onClick={onExport}>
               <Download size={18} />
-              <span>导出JSON</span>
+              <span>{t.exportJSON}</span>
             </button>
             <button className="btn btn-outline" onClick={onExportTxt}>
               <FileText size={18} />
-              <span>导出TXT</span>
+              <span>{t.exportTXT}</span>
             </button>
           </div>
           
           <div className="import-section">
             <button className="btn btn-outline" onClick={handleImportClick}>
               <Upload size={18} />
-              <span>导入数据</span>
+              <span>{t.importData}</span>
             </button>
           </div>
         </div>

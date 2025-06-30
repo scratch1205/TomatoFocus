@@ -1,22 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Target, Folder, FolderOpen } from 'lucide-react';
-
-interface Task {
-  id: number;
-  text: string;
-  completed: boolean;
-  created: Date;
-  completedAt: Date | null;
-  color: string;
-  groupId?: number;
-}
-
-interface TaskGroup {
-  id: number;
-  name: string;
-  color: string;
-  created: Date;
-}
+import { Task, TaskGroup, Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 interface TaskManagerProps {
   tasks: Task[];
@@ -31,6 +16,7 @@ interface TaskManagerProps {
   onSelectGroup: (id: number | null) => void;
   glassEffect: boolean;
   animations: boolean;
+  language: Language;
 }
 
 const TaskManager: React.FC<TaskManagerProps> = ({
@@ -45,11 +31,13 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   onDeleteTaskGroup,
   onSelectGroup,
   glassEffect,
-  animations
+  animations,
+  language
 }) => {
   const [taskInput, setTaskInput] = useState('');
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [groupInput, setGroupInput] = useState('');
+  const t = useTranslation(language);
 
   const handleAddTask = () => {
     if (taskInput.trim()) {
@@ -87,9 +75,9 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   };
 
   const getCurrentGroupName = () => {
-    if (selectedGroupId === null) return '默认任务';
+    if (selectedGroupId === null) return t.defaultTasks;
     const group = taskGroups.find(g => g.id === selectedGroupId);
-    return group ? group.name : '默认任务';
+    return group ? group.name : t.defaultTasks;
   };
 
   const filteredTasks = selectedGroupId 
@@ -101,7 +89,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       {/* 任务集选择 */}
       <div className="task-groups-section">
         <div className="task-group-header">
-          <h3>任务集</h3>
+          <h3>{t.taskGroups}</h3>
           <button 
             className={`btn btn-sm btn-primary ${animations ? 'animated-btn' : ''}`}
             onClick={() => setShowGroupModal(true)}
@@ -115,7 +103,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
             onClick={() => onSelectGroup(null)}
           >
             <Folder size={16} />
-            <span>默认任务</span>
+            <span>{t.defaultTasks}</span>
             <span className="task-count">{tasks.filter(t => !t.groupId).length}</span>
           </div>
           {taskGroups.map(group => (
@@ -147,7 +135,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       <div className="task-section">
         <div className="task-header">
           <h2><Target size={20} /> {getCurrentGroupName()}</h2>
-          <span>{filteredTasks.length} 任务</span>
+          <span>{filteredTasks.length} {t.tasks}</span>
         </div>
 
         <div className="task-input">
@@ -156,7 +144,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
             value={taskInput}
             onChange={(e) => setTaskInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="添加新任务..."
+            placeholder={t.addTask + '...'}
             className={glassEffect ? 'glass-input' : 'solid-input'}
           />
           <button 
@@ -184,7 +172,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
                 <div className="task-text">{task.text}</div>
                 {task.completed && task.completedAt && (
                   <div className="task-time">
-                    完成于: {formatTime(task.completedAt)}
+                    {t.completedAt}: {formatTime(task.completedAt)}
                   </div>
                 )}
               </div>
@@ -193,14 +181,14 @@ const TaskManager: React.FC<TaskManagerProps> = ({
                 <button
                   className="task-btn"
                   onClick={() => onEditTask(task)}
-                  title="编辑"
+                  title={t.edit}
                 >
                   <Edit size={16} />
                 </button>
                 <button
                   className="task-btn"
                   onClick={() => onDeleteTask(task.id)}
-                  title="删除"
+                  title={t.delete}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -210,7 +198,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
           
           {filteredTasks.length === 0 && (
             <div className="text-center text-gray-400 py-8">
-              暂无任务，添加一个开始吧！
+              {t.noTasks}
             </div>
           )}
         </div>
@@ -220,18 +208,18 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       {showGroupModal && (
         <div className="group-modal-overlay" onClick={() => setShowGroupModal(false)}>
           <div className="group-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>创建任务集</h3>
+            <h3>{t.createTaskGroup}</h3>
             <input
               type="text"
               value={groupInput}
               onChange={(e) => setGroupInput(e.target.value)}
               onKeyDown={handleGroupKeyPress}
-              placeholder="输入任务集名称"
+              placeholder={t.taskGroupName}
               autoFocus
             />
             <div className="group-modal-buttons">
-              <button onClick={() => setShowGroupModal(false)}>取消</button>
-              <button onClick={handleAddGroup}>创建</button>
+              <button onClick={() => setShowGroupModal(false)}>{t.cancel}</button>
+              <button onClick={handleAddGroup}>{t.create}</button>
             </div>
           </div>
         </div>

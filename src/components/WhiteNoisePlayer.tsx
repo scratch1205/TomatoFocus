@@ -1,17 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Music, Volume2, VolumeX } from 'lucide-react';
+import { Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
-const WhiteNoisePlayer: React.FC = () => {
+interface WhiteNoisePlayerProps {
+  language?: Language;
+}
+
+const WhiteNoisePlayer: React.FC<WhiteNoisePlayerProps> = ({ language = 'zh-CN' }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSound, setCurrentSound] = useState('rain');
   const [volume, setVolume] = useState(0.5);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const t = useTranslation(language);
 
   const sounds = [
-    { id: 'rain', name: '雨声', url: 'https://www.soundvery.com/sounds/rain.mp3' },
-    { id: 'ocean', name: '海浪', url: 'https://www.soundvery.com/sounds/ocean.mp3' },
-    { id: 'forest', name: '森林', url: 'https://www.soundvery.com/sounds/forest.mp3' },
-    { id: 'fire', name: '火焰', url: 'https://www.soundvery.com/sounds/fire.mp3' }
+    { id: 'rain', name: t.rain, url: 'https://www.soundvery.com/sounds/rain.mp3' },
+    { id: 'ocean', name: t.ocean, url: 'https://www.soundvery.com/sounds/ocean.mp3' },
+    { id: 'forest', name: t.forest, url: 'https://www.soundvery.com/sounds/forest.mp3' },
+    { id: 'fire', name: t.fire, url: 'https://www.soundvery.com/sounds/fire.mp3' }
   ];
 
   useEffect(() => {
@@ -36,7 +43,7 @@ const WhiteNoisePlayer: React.FC = () => {
   };
 
   const getCurrentSoundName = () => {
-    return sounds.find(sound => sound.id === currentSound)?.name || '雨声';
+    return sounds.find(sound => sound.id === currentSound)?.name || t.rain;
   };
 
   return (
@@ -53,7 +60,7 @@ const WhiteNoisePlayer: React.FC = () => {
         onClick={togglePlay}
       >
         {isPlaying ? <VolumeX size={20} /> : <Volume2 size={20} />}
-        <span>白噪音: {getCurrentSoundName()}</span>
+        <span>{t.whiteNoise}: {getCurrentSoundName()}</span>
       </div>
     </div>
   );

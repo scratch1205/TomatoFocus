@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Clock, Settings, BarChart3, Music, Upload, Download, Play, Pause, RotateCcw, Plus, Edit, Trash2, Check, X, Calendar, Target, Maximize, Folder, FolderOpen } from 'lucide-react';
 import StatsPanel from './StatsPanel';
 import DraggableSidebar from './DraggableSidebar';
@@ -8,54 +8,14 @@ import TaskGroupModal from './TaskGroupModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
 import Notification from './Notification';
 import FullscreenClock from './FullscreenClock';
-
-interface Task {
-  id: number;
-  text: string;
-  completed: boolean;
-  created: Date;
-  completedAt: Date | null;
-  color: string;
-  groupId?: number;
-}
-
-interface TaskGroup {
-  id: number;
-  name: string;
-  color: string;
-  created: Date;
-}
-
-interface CheckinData {
-  date: string;
-  time: string;
-}
-
-interface AppSettings {
-  enableFullscreen: boolean;
-  enableGlassEffect: boolean;
-  enableAnimations: boolean;
-  clockStyle: 'digital' | 'flip' | 'analog';
-}
-
-interface AppData {
-  tasks: Task[];
-  taskGroups: TaskGroup[];
-  completedPomodoros: number;
-  focusTime: number;
-  completedTasks: number;
-  workTime: number;
-  breakTime: number;
-  checkins: CheckinData[];
-  settings: AppSettings;
-  dailyFocusData: { [key: string]: number };
-}
+import { Task, TaskGroup, CheckinData, AppSettings, AppData, Language, ColorTheme } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 const PomodoroApp: React.FC = () => {
   // Timer states
   const [workTime, setWorkTime] = useState(25 * 60);
   const [breakTime, setBreakTime] = useState(5 * 60);
-  const [timeLeft, setTimeLeft] = useState(workTime);
+  const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [isWorkTime, setIsWorkTime] = useState(true);
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
@@ -86,7 +46,9 @@ const PomodoroApp: React.FC = () => {
     enableFullscreen: false,
     enableGlassEffect: true,
     enableAnimations: true,
-    clockStyle: 'flip'
+    clockStyle: 'flip',
+    colorTheme: 'blue',
+    language: 'zh-CN'
   });
 
   // Daily focus data for charts
@@ -95,6 +57,20 @@ const PomodoroApp: React.FC = () => {
   // Refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Get translations
+  const t = useTranslation(settings.language);
+
+  // Apply color theme
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', settings.colorTheme);
+  }, [settings.colorTheme]);
+
+  // Apply language to document
+  useEffect(() => {
+    document.documentElement.lang = settings.language;
+    document.title = t.appTitle;
+  }, [settings.language, t.appTitle]);
 
   // Generate random color for tasks
   const generateRandomColor = () => {
@@ -132,7 +108,9 @@ const PomodoroApp: React.FC = () => {
           enableFullscreen: false,
           enableGlassEffect: true,
           enableAnimations: true,
-          clockStyle: 'flip'
+          clockStyle: 'flip',
+          colorTheme: 'blue',
+          language: 'zh-CN'
         });
         setDailyFocusData(data.dailyFocusData || {});
         
@@ -188,30 +166,50 @@ const PomodoroApp: React.FC = () => {
     }
   }, [settings.enableFullscreen]);
 
-  // 核心计时器逻辑 - 移除workTime和breakTime依赖
+  // Initialize timer when work/break time changes and timer is not running
+  useEffect(() => {
+    if (!isRunning) {
+      setTimeLeft(isWorkTime ? workTime : breakTime);
+    }
+  }, [workTime, breakTime, isWorkTime, isRunning]);
+
+  // Timer logic - Fixed to prevent infinite loops
+  const tick = useCallback(() => {
+    setTimeLeft(prev => {
+      if (prev <= 1) {
+        // Timer finished
+        setIsRunning(false);
+        if (isWorkTime) {
+          setCompletedPomodoros(prev => prev + 1);
+          showNotificationMessage(t.workTimeEnd);
+          playSound();
+        } else {
+          showNotificationMessage(t.breakTimeEnd);
+          playSound();
+        }
+        
+        // Switch to next phase
+        const nextIsWorkTime = !isWorkTime;
+        setIsWorkTime(nextIsWorkTime);
+        
+        // Set next timer duration
+        setTimeout(() => {
+          setTimeLeft(nextIsWorkTime ? workTime : breakTime);
+        }, 100);
+        
+        return 0;
+      }
+      return prev - 1;
+    });
+    
+    if (isWorkTime) {
+      setFocusTime(prev => prev + 1);
+    }
+  }, [isWorkTime, workTime, breakTime, t.workTimeEnd, t.breakTimeEnd]);
+
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
-      timerRef.current = setTimeout(() => {
-        setTimeLeft(prev => prev - 1);
-        if (isWorkTime) {
-          setFocusTime(prev => prev + 1);
-        }
-      }, 1000);
-    } else if (timeLeft === 0 && isRunning) {
-      // Timer finished
-      setIsRunning(false);
-      if (isWorkTime) {
-        setCompletedPomodoros(prev => prev + 1);
-        showNotificationMessage('工作时间结束！该休息了');
-        playSound();
-      } else {
-        showNotificationMessage('休息时间结束！开始工作吧');
-        playSound();
-      }
-      
-      // Switch to next phase
-      setIsWorkTime(!isWorkTime);
-      setTimeLeft(!isWorkTime ? workTime : breakTime);
+      timerRef.current = setTimeout(tick, 1000);
     }
 
     return () => {
@@ -219,15 +217,7 @@ const PomodoroApp: React.FC = () => {
         clearTimeout(timerRef.current);
       }
     };
-  }, [isRunning, timeLeft, isWorkTime]); // 移除workTime和breakTime依赖
-
-  // 单独处理工作/休息时间变化时的重置逻辑
-  useEffect(() => {
-    // 只有在计时器未运行时才重置时间
-    if (!isRunning) {
-      setTimeLeft(isWorkTime ? workTime : breakTime);
-    }
-  }, [workTime, breakTime, isWorkTime, isRunning]);
+  }, [isRunning, timeLeft, tick]);
 
   const calculateStreak = (checkinData: CheckinData[]) => {
     if (checkinData.length === 0) {
@@ -277,7 +267,7 @@ const PomodoroApp: React.FC = () => {
     setIsRunning(false);
     setIsWorkTime(true);
     setTimeLeft(workTime);
-    showNotificationMessage('计时器已重置');
+    showNotificationMessage(t.timerReset);
   };
 
   const showNotificationMessage = (message: string) => {
@@ -298,7 +288,7 @@ const PomodoroApp: React.FC = () => {
       groupId
     };
     setTasks([...tasks, newTask]);
-    showNotificationMessage('任务已添加');
+    showNotificationMessage(t.taskAdded);
   };
 
   const addTaskGroup = (name: string) => {
@@ -309,7 +299,7 @@ const PomodoroApp: React.FC = () => {
       created: new Date()
     };
     setTaskGroups([...taskGroups, newGroup]);
-    showNotificationMessage('任务集已创建');
+    showNotificationMessage(t.taskGroupCreated);
   };
 
   const toggleTask = (id: number) => {
@@ -323,7 +313,7 @@ const PomodoroApp: React.FC = () => {
         
         if (!task.completed) {
           setCompletedTasks(prev => prev + 1);
-          showNotificationMessage('任务已完成！');
+          showNotificationMessage(t.taskCompleted);
         } else {
           setCompletedTasks(prev => prev - 1);
         }
@@ -340,7 +330,7 @@ const PomodoroApp: React.FC = () => {
       setCompletedTasks(prev => prev - 1);
     }
     setTasks(tasks.filter(task => task.id !== id));
-    showNotificationMessage('任务已删除');
+    showNotificationMessage(t.taskDeleted);
   };
 
   const deleteTaskGroup = (id: number) => {
@@ -356,7 +346,7 @@ const PomodoroApp: React.FC = () => {
       setSelectedGroupId(null);
     }
     
-    showNotificationMessage('任务集已删除');
+    showNotificationMessage(t.taskGroupDeleted);
   };
 
   const editTask = (task: Task) => {
@@ -371,7 +361,7 @@ const PomodoroApp: React.FC = () => {
           ? { ...task, text }
           : task
       ));
-      showNotificationMessage('任务已更新');
+      showNotificationMessage(t.taskUpdated);
     }
     setShowEditModal(false);
     setEditingTask(null);
@@ -388,7 +378,7 @@ const PomodoroApp: React.FC = () => {
     setCheckins(updatedCheckins);
     setTodayCheckedIn(true);
     calculateStreak(updatedCheckins);
-    showNotificationMessage('早起打卡成功！');
+    showNotificationMessage(t.checkinSuccess);
   };
 
   const exportData = () => {
@@ -413,79 +403,79 @@ const PomodoroApp: React.FC = () => {
     link.download = `pomodoro-data-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    showNotificationMessage('JSON数据已导出');
+    showNotificationMessage(t.dataExported);
   };
 
   const exportDataAsTxt = () => {
     const now = new Date();
-    const dateStr = now.toLocaleDateString('zh-CN');
-    const timeStr = now.toLocaleTimeString('zh-CN');
+    const dateStr = now.toLocaleDateString(settings.language === 'en' ? 'en-US' : 'zh-CN');
+    const timeStr = now.toLocaleTimeString(settings.language === 'en' ? 'en-US' : 'zh-CN');
     
-    let txtContent = `番茄钟专注系统 - 数据报告
-导出时间: ${dateStr} ${timeStr}
+    let txtContent = `${t.appTitle} - ${t.statistics}
+${t.exportTXT}: ${dateStr} ${timeStr}
 ========================================
 
-📊 统计概览
+📊 ${t.statistics}
 ----------------------------------------
-• 完成番茄钟: ${completedPomodoros} 个
-• 总专注时间: ${Math.floor(focusTime / 3600)}小时${Math.floor((focusTime % 3600) / 60)}分钟
-• 完成任务数: ${completedTasks} 个
-• 总任务数: ${tasks.length} 个
-• 任务完成率: ${tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0}%
-• 连续打卡: ${streak} 天
+• ${t.completedPomodoros}: ${completedPomodoros}
+• ${t.focusTime}: ${Math.floor(focusTime / 3600)}${t.hours}${Math.floor((focusTime % 3600) / 60)}${t.mins}
+• ${t.completedTasks}: ${completedTasks}
+• ${t.tasks}: ${tasks.length}
+• ${t.streak}: ${streak} ${t.days}
 
-⚙️ 当前设置
+⚙️ ${t.settings}
 ----------------------------------------
-• 工作时间: ${Math.floor(workTime / 60)} 分钟
-• 休息时间: ${Math.floor(breakTime / 60)} 分钟
-• 毛玻璃效果: ${settings.enableGlassEffect ? '开启' : '关闭'}
-• 动画效果: ${settings.enableAnimations ? '开启' : '关闭'}
-• 时钟样式: ${settings.clockStyle === 'digital' ? '数字时钟' : settings.clockStyle === 'flip' ? '翻页时钟' : '模拟时钟'}
+• ${t.workTime}: ${Math.floor(workTime / 60)} ${t.minutes}
+• ${t.breakTime}: ${Math.floor(breakTime / 60)} ${t.minutes}
+• ${t.glassEffect}: ${settings.enableGlassEffect ? '✓' : '✗'}
+• ${t.animations}: ${settings.enableAnimations ? '✓' : '✗'}
+• ${t.clockStyle}: ${settings.clockStyle === 'digital' ? t.digitalClock : settings.clockStyle === 'flip' ? t.flipClock : t.analogClock}
+• ${t.colorTheme}: ${settings.colorTheme}
+• ${t.language}: ${settings.language}
 
 `;
 
-    // 任务集信息
+    // Task groups info
     if (taskGroups.length > 0) {
-      txtContent += `📁 任务集列表 (${taskGroups.length}个)
+      txtContent += `📁 ${t.taskGroups} (${taskGroups.length})
 ----------------------------------------
 `;
       taskGroups.forEach((group, index) => {
         const groupTasks = tasks.filter(task => task.groupId === group.id);
         const completedGroupTasks = groupTasks.filter(task => task.completed).length;
         txtContent += `${index + 1}. ${group.name}
-   • 任务数量: ${groupTasks.length}
-   • 已完成: ${completedGroupTasks}
-   • 完成率: ${groupTasks.length > 0 ? Math.round((completedGroupTasks / groupTasks.length) * 100) : 0}%
-   • 创建时间: ${new Date(group.created).toLocaleDateString('zh-CN')}
+   • ${t.tasks}: ${groupTasks.length}
+   • ${t.completedTasks}: ${completedGroupTasks}
+   • ${t.create}: ${new Date(group.created).toLocaleDateString(settings.language === 'en' ? 'en-US' : 'zh-CN')}
 
 `;
       });
     }
 
-    // 任务详情
-    txtContent += `📝 任务详情 (${tasks.length}个)
+    // Task details
+    txtContent += `📝 ${t.tasks} (${tasks.length})
 ----------------------------------------
 `;
 
-    // 默认任务
+    // Default tasks
     const defaultTasks = tasks.filter(task => !task.groupId);
     if (defaultTasks.length > 0) {
-      txtContent += `【默认任务】
+      txtContent += `【${t.defaultTasks}】
 `;
       defaultTasks.forEach((task, index) => {
         txtContent += `${index + 1}. ${task.completed ? '✅' : '⏳'} ${task.text}
-   • 状态: ${task.completed ? '已完成' : '进行中'}
-   • 创建时间: ${new Date(task.created).toLocaleDateString('zh-CN')} ${new Date(task.created).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+   • ${task.completed ? t.completedAt : t.tasks}: ${task.completed ? 'completed' : 'pending'}
+   • ${t.create}: ${new Date(task.created).toLocaleDateString(settings.language === 'en' ? 'en-US' : 'zh-CN')} ${new Date(task.created).toLocaleTimeString(settings.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' })}
 `;
         if (task.completed && task.completedAt) {
-          txtContent += `   • 完成时间: ${new Date(task.completedAt).toLocaleDateString('zh-CN')} ${new Date(task.completedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+          txtContent += `   • ${t.completedAt}: ${new Date(task.completedAt).toLocaleDateString(settings.language === 'en' ? 'en-US' : 'zh-CN')} ${new Date(task.completedAt).toLocaleTimeString(settings.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' })}
 `;
         }
         txtContent += '\n';
       });
     }
 
-    // 任务集中的任务
+    // Tasks in groups
     taskGroups.forEach(group => {
       const groupTasks = tasks.filter(task => task.groupId === group.id);
       if (groupTasks.length > 0) {
@@ -493,11 +483,11 @@ const PomodoroApp: React.FC = () => {
 `;
         groupTasks.forEach((task, index) => {
           txtContent += `${index + 1}. ${task.completed ? '✅' : '⏳'} ${task.text}
-   • 状态: ${task.completed ? '已完成' : '进行中'}
-   • 创建时间: ${new Date(task.created).toLocaleDateString('zh-CN')} ${new Date(task.created).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+   • ${task.completed ? t.completedAt : t.tasks}: ${task.completed ? 'completed' : 'pending'}
+   • ${t.create}: ${new Date(task.created).toLocaleDateString(settings.language === 'en' ? 'en-US' : 'zh-CN')} ${new Date(task.created).toLocaleTimeString(settings.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' })}
 `;
           if (task.completed && task.completedAt) {
-            txtContent += `   • 完成时间: ${new Date(task.completedAt).toLocaleDateString('zh-CN')} ${new Date(task.completedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+            txtContent += `   • ${t.completedAt}: ${new Date(task.completedAt).toLocaleDateString(settings.language === 'en' ? 'en-US' : 'zh-CN')} ${new Date(task.completedAt).toLocaleTimeString(settings.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' })}
 `;
           }
           txtContent += '\n';
@@ -505,62 +495,33 @@ const PomodoroApp: React.FC = () => {
       }
     });
 
-    // 打卡记录
+    // Check-in records
     if (checkins.length > 0) {
-      txtContent += `🌅 早起打卡记录 (${checkins.length}次)
+      txtContent += `🌅 ${t.checkin} (${checkins.length})
 ----------------------------------------
 `;
-      // 按日期排序，最新的在前
       const sortedCheckins = [...checkins].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       sortedCheckins.forEach((checkin, index) => {
         const checkinDate = new Date(checkin.date);
-        txtContent += `${index + 1}. ${checkinDate.toLocaleDateString('zh-CN')} ${checkin.time}
+        txtContent += `${index + 1}. ${checkinDate.toLocaleDateString(settings.language === 'en' ? 'en-US' : 'zh-CN')} ${checkin.time}
 `;
       });
       txtContent += '\n';
     }
 
-    // 每日专注数据
-    const focusDataEntries = Object.entries(dailyFocusData).filter(([_, minutes]) => minutes > 0);
-    if (focusDataEntries.length > 0) {
-      txtContent += `📈 每日专注时间记录
-----------------------------------------
-`;
-      // 按日期排序
-      focusDataEntries
-        .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
-        .forEach(([dateStr, seconds]) => {
-          const date = new Date(dateStr);
-          const minutes = Math.floor(seconds / 60);
-          const hours = Math.floor(minutes / 60);
-          const remainingMinutes = minutes % 60;
-          
-          let timeStr = '';
-          if (hours > 0) {
-            timeStr = `${hours}小时${remainingMinutes}分钟`;
-          } else {
-            timeStr = `${remainingMinutes}分钟`;
-          }
-          
-          txtContent += `• ${date.toLocaleDateString('zh-CN')}: ${timeStr}
-`;
-        });
-    }
-
     txtContent += `
 ========================================
-导出完成 - 番茄钟专注系统
-感谢使用！继续保持专注！🍅
+${t.dataExported} - ${t.appTitle}
 `;
 
     const dataBlob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `番茄钟数据报告-${new Date().toISOString().split('T')[0]}.txt`;
+    link.download = `${t.appTitle}-${new Date().toISOString().split('T')[0]}.txt`;
     link.click();
     URL.revokeObjectURL(url);
-    showNotificationMessage('TXT报告已导出');
+    showNotificationMessage(t.dataExported);
   };
 
   const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -590,7 +551,9 @@ const PomodoroApp: React.FC = () => {
             enableFullscreen: false,
             enableGlassEffect: true,
             enableAnimations: true,
-            clockStyle: 'flip'
+            clockStyle: 'flip',
+            colorTheme: 'blue',
+            language: 'zh-CN'
           });
           setDailyFocusData(data.dailyFocusData || {});
           
@@ -600,10 +563,10 @@ const PomodoroApp: React.FC = () => {
           setTodayCheckedIn(!!todayCheckin);
           
           calculateStreak(data.checkins || []);
-          showNotificationMessage('数据导入成功');
+          showNotificationMessage(t.dataImported);
         } catch (error) {
           console.error('Import error:', error);
-          showNotificationMessage('数据导入失败');
+          showNotificationMessage(t.importFailed);
         }
       };
       reader.readAsText(file);
@@ -629,48 +592,48 @@ const PomodoroApp: React.FC = () => {
       </audio>
 
       {/* macOS风格顶部任务栏 */}
-      <div className={`macos-dock ${settings.enableGlassEffect ? 'glass-effect' : 'solid-bg'} ${settings.enableAnimations ? 'animated' : ''}`}>
+      <div className={`macos-dock ${settings.enableGlassEffect ?'glass-effect' : 'solid-bg'} ${settings.enableAnimations ? 'animated' : ''}`}>
         <div
           className={`dock-item ${activePanel === 'pomodoro' ? 'active' : ''}`}
           onClick={() => setActivePanel('pomodoro')}
         >
           <Clock size={24} />
-          <span className="tooltip">番茄钟</span>
+          <span className="tooltip">{t.appTitle}</span>
         </div>
         <div
           className={`dock-item ${activePanel === 'tasks' ? 'active' : ''}`}
           onClick={() => setActivePanel('tasks')}
         >
           <Target size={24} />
-          <span className="tooltip">待办事项</span>
+          <span className="tooltip">{t.tasks}</span>
         </div>
         <div
           className={`dock-item ${activePanel === 'stats' ? 'active' : ''}`}
           onClick={() => setActivePanel('stats')}
         >
           <BarChart3 size={24} />
-          <span className="tooltip">统计信息</span>
+          <span className="tooltip">{t.statistics}</span>
         </div>
         <div
           className={`dock-item ${activePanel === 'noise' ? 'active' : ''}`}
           onClick={() => setActivePanel('noise')}
         >
           <Music size={24} />
-          <span className="tooltip">白噪音</span>
+          <span className="tooltip">{t.whiteNoise}</span>
         </div>
         <div
           className={`dock-item ${showFullscreenClock ? 'active' : ''}`}
           onClick={() => setShowFullscreenClock(true)}
         >
           <Maximize size={24} />
-          <span className="tooltip">全屏时钟</span>
+          <span className="tooltip">{t.fullscreenClock}</span>
         </div>
         <div
           className={`dock-item ${showSettings ? 'active' : ''}`}
           onClick={() => setShowSettings(!showSettings)}
         >
           <Settings size={24} />
-          <span className="tooltip">设置</span>
+          <span className="tooltip">{t.settings}</span>
         </div>
       </div>
 
@@ -708,7 +671,7 @@ const PomodoroApp: React.FC = () => {
                     className="timer-status"
                     style={{ color: isWorkTime ? 'var(--work)' : 'var(--break)' }}
                   >
-                    {isWorkTime ? '工作中' : '休息中'}
+                    {isWorkTime ? t.working : t.resting}
                   </div>
                 </div>
               </div>
@@ -717,11 +680,11 @@ const PomodoroApp: React.FC = () => {
             <div className="timer-controls">
               <button className={`btn btn-primary ${settings.enableAnimations ? 'animated-btn' : ''}`} onClick={toggleTimer}>
                 {isRunning ? <Pause size={20} /> : <Play size={20} />}
-                <span>{isRunning ? '暂停' : '开始'}</span>
+                <span>{isRunning ? t.pause : t.start}</span>
               </button>
               <button className={`btn btn-outline ${settings.enableAnimations ? 'animated-btn' : ''}`} onClick={resetTimer}>
                 <RotateCcw size={20} />
-                <span>重置</span>
+                <span>{t.reset}</span>
               </button>
             </div>
 
@@ -739,6 +702,7 @@ const PomodoroApp: React.FC = () => {
             dailyFocusData={dailyFocusData}
             glassEffect={settings.enableGlassEffect}
             animations={settings.enableAnimations}
+            language={settings.language}
           />
         </div>
 
@@ -760,6 +724,7 @@ const PomodoroApp: React.FC = () => {
           onCheckin={handleCheckin}
           glassEffect={settings.enableGlassEffect}
           animations={settings.enableAnimations}
+          language={settings.language}
         />
       </div>
 
@@ -769,9 +734,10 @@ const PomodoroApp: React.FC = () => {
         onClose={() => setShowFullscreenClock(false)}
         isTimerRunning={isRunning}
         timerTime={formatTime(timeLeft)}
-        timerStatus={isWorkTime ? '工作中' : '休息中'}
+        timerStatus={isWorkTime ? t.working : t.resting}
         clockStyle={settings.clockStyle}
         enableAnimations={settings.enableAnimations}
+        language={settings.language}
       />
 
       {/* 设置面板 */}
@@ -787,6 +753,7 @@ const PomodoroApp: React.FC = () => {
         onExportTxt={exportDataAsTxt}
         onImport={importData}
         onClose={() => setShowSettings(false)}
+        language={settings.language}
       />
 
       {/* 任务集模态框 */}
@@ -794,6 +761,7 @@ const PomodoroApp: React.FC = () => {
         show={showTaskGroupModal}
         onSave={addTaskGroup}
         onClose={() => setShowTaskGroupModal(false)}
+        language={settings.language}
       />
 
       {/* 编辑模态框 */}
@@ -805,6 +773,7 @@ const PomodoroApp: React.FC = () => {
           setShowEditModal(false);
           setEditingTask(null);
         }}
+        language={settings.language}
       />
 
       {/* 通知 */}

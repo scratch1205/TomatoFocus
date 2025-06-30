@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Minimize2, Settings as SettingsIcon } from 'lucide-react';
+import { Language } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 interface FullscreenClockProps {
   show: boolean;
@@ -9,6 +11,7 @@ interface FullscreenClockProps {
   timerStatus: string;
   clockStyle: 'digital' | 'flip' | 'analog';
   enableAnimations: boolean;
+  language: Language;
 }
 
 const FullscreenClock: React.FC<FullscreenClockProps> = ({
@@ -18,7 +21,8 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
   timerTime,
   timerStatus,
   clockStyle,
-  enableAnimations
+  enableAnimations,
+  language
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showMiniTimer, setShowMiniTimer] = useState(false);
@@ -29,6 +33,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
   const [miniTimerPos, setMiniTimerPos] = useState({ x: 30, y: 30 });
   const [showPomodoroMode, setShowPomodoroMode] = useState(false);
   const [flipAnimations, setFlipAnimations] = useState<{[key: string]: boolean}>({});
+  const t = useTranslation(language);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -141,7 +146,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
       day: 'numeric',
       weekday: 'long'
     };
-    return date.toLocaleDateString('zh-CN', options);
+    return date.toLocaleDateString(language === 'en' ? 'en-US' : 'zh-CN', options);
   };
 
   const formatPomodoroTime = (date: Date) => {
@@ -291,7 +296,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
             <div className="flip-clock-container fullscreen-pomodoro">
               {/* 状态指示器 - 缩小并移到顶部 */}
               <div className="pomodoro-status-indicator-fullscreen">
-                <div className={`status-badge-fullscreen ${timerStatus === '工作中' ? 'work-mode' : 'break-mode'}`}>
+                <div className={`status-badge-fullscreen ${timerStatus === t.working ? 'work-mode' : 'break-mode'}`}>
                   {timerStatus}
                 </div>
               </div>
@@ -306,7 +311,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                       {renderFlipDigit(pomodoroData.minutes[0], 'pomodoro-minutes0', 'ultra')}
                       {renderFlipDigit(pomodoroData.minutes[1], 'pomodoro-minutes1', 'ultra')}
                     </div>
-                    <div className="pomodoro-unit-label-fullscreen">分钟</div>
+                    <div className="pomodoro-unit-label-fullscreen">{t.mins}</div>
                   </div>
 
                   {/* 分隔符 */}
@@ -315,7 +320,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                     fontWeight: '900', 
                     color: 'var(--primary)', 
                     textShadow: '0 0 40px rgba(67, 97, 238, 0.8)',
-                    fontFamily: 'Alibaba PuHuiTi, sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     animation: 'pulse-glow 2s ease-in-out infinite alternate'
                   }}>
                     :
@@ -327,7 +332,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                       {renderFlipDigit(pomodoroData.seconds[0], 'pomodoro-seconds0', 'ultra')}
                       {renderFlipDigit(pomodoroData.seconds[1], 'pomodoro-seconds1', 'ultra')}
                     </div>
-                    <div className="pomodoro-second-label-fullscreen">秒</div>
+                    <div className="pomodoro-second-label-fullscreen">{t.secs}</div>
                   </div>
                 </div>
               </div>
@@ -335,10 +340,10 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
               {/* 描述信息 - 缩小并移到底部 */}
               <div className="pomodoro-description-fullscreen">
                 <div className="description-text-fullscreen">
-                  {timerStatus === '工作中' ? '🍅 专注时间，保持高效！' : '☕ 休息时间，放松一下！'}
+                  {timerStatus === t.working ? t.focusMessage : t.restMessage}
                 </div>
                 <div className="time-detail-fullscreen">
-                  剩余 {pomodoroData.totalMinutes} 分 {pomodoroData.totalSeconds} 秒
+                  {t.remaining} {pomodoroData.totalMinutes} {t.mins} {pomodoroData.totalSeconds} {t.secs}
                 </div>
               </div>
 
@@ -347,13 +352,13 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                 className="mode-switch-btn-fullscreen"
                 onClick={() => setShowPomodoroMode(false)}
               >
-                查看当前时间
+                {t.viewCurrentTime}
               </button>
             </div>
           );
         }
 
-        // 纯翻页时钟 - 模仿FlipFlow样式
+        // 纯翻页时钟
         return (
           <div className="pure-flip-clock">
             <div className="flip-clock-main">
@@ -364,7 +369,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                     {renderFlipDigit(hours[0], 'hours0', 'large')}
                     {renderFlipDigit(hours[1], 'hours1', 'large')}
                   </div>
-                  <div className="flip-label">时</div>
+                  <div className="flip-label">{language === 'en' ? 'Hour' : '时'}</div>
                 </div>
 
                 <div className="flip-separator-large">:</div>
@@ -375,7 +380,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                     {renderFlipDigit(minutes[0], 'minutes0', 'large')}
                     {renderFlipDigit(minutes[1], 'minutes1', 'large')}
                   </div>
-                  <div className="flip-label">分</div>
+                  <div className="flip-label">{language === 'en' ? 'Min' : '分'}</div>
                 </div>
 
                 <div className="flip-separator-large">:</div>
@@ -386,7 +391,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                     {renderFlipDigit(seconds[0], 'seconds0', 'large')}
                     {renderFlipDigit(seconds[1], 'seconds1', 'large')}
                   </div>
-                  <div className="flip-label">秒</div>
+                  <div className="flip-label">{language === 'en' ? 'Sec' : '秒'}</div>
                 </div>
               </div>
             </div>
@@ -401,7 +406,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
                 className="mode-switch-btn"
                 onClick={() => setShowPomodoroMode(true)}
               >
-                查看番茄钟倒计时
+                {t.viewPomodoroCountdown}
               </button>
             )}
           </div>
@@ -435,7 +440,7 @@ const FullscreenClock: React.FC<FullscreenClockProps> = ({
           onMouseDown={handleMouseDown}
         >
           <div className="mini-timer-header">
-            <span className="mini-timer-title">番茄计时器</span>
+            <span className="mini-timer-title">{language === 'en' ? 'Pomodoro Timer' : '番茄计时器'}</span>
             <button 
               className="mini-timer-close"
               onClick={() => setShowMiniTimer(false)}
