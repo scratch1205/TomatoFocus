@@ -38,44 +38,28 @@ const TaskGroupModal: React.FC<TaskGroupModalProps> = ({
   if (!show) return null;
 
   return (
-    <div className={`fullscreen-edit-modal ${show ? 'active' : ''}`}>
-      <div className="fullscreen-edit-overlay" onClick={handleClose}></div>
-      <div className="fullscreen-edit-content">
-        <div className="fullscreen-edit-header">
-          <h2 className="fullscreen-edit-title">
-            <Folder size={28} />
-            <span>创建任务集</span>
-          </h2>
-          <button className="fullscreen-edit-close" onClick={handleClose}>
-            <X size={24} />
-          </button>
-        </div>
-        
-        <div className="fullscreen-edit-body">
-          <div className="edit-form">
-            <label className="edit-label">任务集名称</label>
-            <input
-              type="text"
-              className="fullscreen-edit-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="输入任务集名称"
-              autoFocus
-            />
-            <div className="edit-hint">
-              任务集可以帮助你更好地组织和管理相关的任务
-            </div>
-          </div>
-        </div>
-
-        <div className="fullscreen-edit-footer">
-          <button className="btn btn-outline btn-large" onClick={handleClose}>
-            <X size={20} />
+    <div className={`edit-modal ${show ? 'active' : ''}`}>
+      <div className="edit-content">
+        <h2 className="edit-title">
+          <Folder size={24} />
+          <span>创建任务集</span>
+        </h2>
+        <input
+          type="text"
+          className="edit-input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={handleKeyPress}
+          placeholder="输入任务集名称"
+          autoFocus
+        />
+        <div className="edit-buttons">
+          <button className="btn btn-outline" onClick={handleClose}>
+            <X size={16} />
             <span>取消</span>
           </button>
-          <button className="btn btn-primary btn-large" onClick={handleSave}>
-            <Check size={20} />
+          <button className="btn btn-primary" onClick={handleSave}>
+            <Check size={16} />
             <span>创建</span>
           </button>
         </div>
