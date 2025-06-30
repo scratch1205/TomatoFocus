@@ -189,26 +189,30 @@ const DraggableSidebar: React.FC<DraggableSidebarProps> = ({
 
   return (
     <div className={`draggable-sidebar ${glassEffect ? 'glass-panel' : 'solid-panel'}`}>
-      {getComponents().map((comp) => (
-        <div
-          key={comp.id}
-          className={`draggable-component ${draggedItem === comp.id ? 'dragging' : ''} ${dragOverItem === comp.id ? 'drag-over' : ''} ${animations ? 'animated' : ''}`}
-          draggable
-          onDragStart={(e) => handleDragStart(e, comp.id)}
-          onDragOver={(e) => handleDragOver(e, comp.id)}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => handleDrop(e, comp.id)}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="drag-handle">
-            <GripVertical size={16} />
-            <span className="component-name">{comp.name}</span>
+      <div className="sidebar-scroll-container">
+        {getComponents().map((comp) => (
+          <div
+            key={comp.id}
+            className={`draggable-component ${draggedItem === comp.id ? 'dragging' : ''} ${dragOverItem === comp.id ? 'drag-over' : ''} ${animations ? 'animated' : ''}`}
+            draggable
+            onDragStart={(e) => handleDragStart(e, comp.id)}
+            onDragOver={(e) => handleDragOver(e, comp.id)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, comp.id)}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="drag-handle">
+              <GripVertical size={16} />
+              <span className="component-name">{comp.name}</span>
+            </div>
+            <div className="component-content">
+              <div className="component-scroll-wrapper">
+                {comp.component}
+              </div>
+            </div>
           </div>
-          <div className="component-content">
-            {comp.component}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

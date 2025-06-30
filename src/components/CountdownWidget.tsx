@@ -167,7 +167,7 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
 
   return (
     <>
-      <div className={`countdown-widget ${glassEffect ? 'glass-panel' : 'solid-panel'}`}>
+      <div className="countdown-widget-container">
         <div className="countdown-header">
           <h3>
             <Target size={20} />
@@ -206,82 +206,84 @@ const CountdownWidget: React.FC<CountdownWidgetProps> = ({ glassEffect, animatio
 
         {/* 倒计时列表 */}
         <div className="countdown-list">
-          {sortedCountdowns.map((countdown) => {
-            const timeLeft = calculateTimeLeft(countdown.targetDate);
-            return (
-              <div
-                key={countdown.id}
-                className={`countdown-item ${timeLeft.isExpired ? 'expired' : ''} ${animations ? 'animated-card' : ''}`}
-                style={{ borderLeftColor: countdown.color }}
-              >
-                <div className="countdown-main">
-                  <div className="countdown-info">
-                    <div className="countdown-title">
-                      <span className="category-icon">{categoryIcons[countdown.category]}</span>
-                      {countdown.title}
-                    </div>
-                    <div className="countdown-description">{countdown.description}</div>
-                    <div className="countdown-target-date">
-                      {t.targetTime}: {countdown.targetDate.toLocaleDateString(language === 'en' ? 'en-US' : 'zh-CN')} {countdown.targetDate.toLocaleTimeString(language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                  </div>
-                  
-                  <div className="countdown-display">
-                    {timeLeft.isExpired ? (
-                      <div className="expired-badge">{t.expired}</div>
-                    ) : (
-                      <div className="time-blocks">
-                        <div className="time-block">
-                          <div className="time-value">{timeLeft.days}</div>
-                          <div className="time-label">{t.days}</div>
-                        </div>
-                        <div className="time-separator">:</div>
-                        <div className="time-block">
-                          <div className="time-value">{timeLeft.hours.toString().padStart(2, '0')}</div>
-                          <div className="time-label">{t.hours}</div>
-                        </div>
-                        <div className="time-separator">:</div>
-                        <div className="time-block">
-                          <div className="time-value">{timeLeft.minutes.toString().padStart(2, '0')}</div>
-                          <div className="time-label">{t.mins}</div>
-                        </div>
-                        <div className="time-separator">:</div>
-                        <div className="time-block">
-                          <div className="time-value">{timeLeft.seconds.toString().padStart(2, '0')}</div>
-                          <div className="time-label">{t.secs}</div>
-                        </div>
+          <div className="countdown-scroll">
+            {sortedCountdowns.map((countdown) => {
+              const timeLeft = calculateTimeLeft(countdown.targetDate);
+              return (
+                <div
+                  key={countdown.id}
+                  className={`countdown-item ${timeLeft.isExpired ? 'expired' : ''} ${animations ? 'animated-card' : ''}`}
+                  style={{ borderLeftColor: countdown.color }}
+                >
+                  <div className="countdown-main">
+                    <div className="countdown-info">
+                      <div className="countdown-title">
+                        <span className="category-icon">{categoryIcons[countdown.category]}</span>
+                        {countdown.title}
                       </div>
-                    )}
+                      <div className="countdown-description">{countdown.description}</div>
+                      <div className="countdown-target-date">
+                        {t.targetTime}: {countdown.targetDate.toLocaleDateString(language === 'en' ? 'en-US' : 'zh-CN')} {countdown.targetDate.toLocaleTimeString(language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                    
+                    <div className="countdown-display">
+                      {timeLeft.isExpired ? (
+                        <div className="expired-badge">{t.expired}</div>
+                      ) : (
+                        <div className="time-blocks">
+                          <div className="time-block">
+                            <div className="time-value">{timeLeft.days}</div>
+                            <div className="time-label">{t.days}</div>
+                          </div>
+                          <div className="time-separator">:</div>
+                          <div className="time-block">
+                            <div className="time-value">{timeLeft.hours.toString().padStart(2, '0')}</div>
+                            <div className="time-label">{t.hours}</div>
+                          </div>
+                          <div className="time-separator">:</div>
+                          <div className="time-block">
+                            <div className="time-value">{timeLeft.minutes.toString().padStart(2, '0')}</div>
+                            <div className="time-label">{t.mins}</div>
+                          </div>
+                          <div className="time-separator">:</div>
+                          <div className="time-block">
+                            <div className="time-value">{timeLeft.seconds.toString().padStart(2, '0')}</div>
+                            <div className="time-label">{t.secs}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="countdown-actions">
+                    <button
+                      className="countdown-btn"
+                      onClick={() => editCountdown(countdown)}
+                      title={t.edit}
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      className="countdown-btn"
+                      onClick={() => deleteCountdown(countdown.id)}
+                      title={t.delete}
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
-
-                <div className="countdown-actions">
-                  <button
-                    className="countdown-btn"
-                    onClick={() => editCountdown(countdown)}
-                    title={t.edit}
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    className="countdown-btn"
-                    onClick={() => deleteCountdown(countdown.id)}
-                    title={t.delete}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+              );
+            })}
+            
+            {countdowns.length === 0 && (
+              <div className="empty-state">
+                <Star size={48} />
+                <div className="empty-title">{language === 'en' ? 'No goals set yet' : '还没有设定目标'}</div>
+                <div className="empty-desc">{language === 'en' ? 'Add a countdown to motivate yourself!' : '添加一个倒计时来激励自己吧！'}</div>
               </div>
-            );
-          })}
-          
-          {countdowns.length === 0 && (
-            <div className="empty-state">
-              <Star size={48} />
-              <div className="empty-title">{language === 'en' ? 'No goals set yet' : '还没有设定目标'}</div>
-              <div className="empty-desc">{language === 'en' ? 'Add a countdown to motivate yourself!' : '添加一个倒计时来激励自己吧！'}</div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -389,66 +391,68 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
           <span>{countdown ? t.editCountdown : t.addCountdown}</span>
         </h2>
         
-        <div className="form-group">
-          <label>{t.goalTitle}</label>
-          <input
-            type="text"
-            className="edit-input"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder={language === 'en' ? 'Enter goal title' : '输入目标标题'}
-            autoFocus
-          />
-        </div>
-
-        <div className="form-group">
-          <label>{t.goalDescription}</label>
-          <input
-            type="text"
-            className="edit-input"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder={language === 'en' ? 'Enter goal description (optional)' : '输入目标描述（可选）'}
-          />
-        </div>
-
-        <div className="form-row">
+        <div className="modal-scroll">
           <div className="form-group">
-            <label>{t.targetDate}</label>
+            <label>{t.goalTitle}</label>
             <input
-              type="date"
+              type="text"
               className="edit-input"
-              value={targetDate}
-              onChange={(e) => setTargetDate(e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={language === 'en' ? 'Enter goal title' : '输入目标标题'}
+              autoFocus
             />
           </div>
+
           <div className="form-group">
-            <label>{t.targetTime}</label>
+            <label>{t.goalDescription}</label>
             <input
-              type="time"
+              type="text"
               className="edit-input"
-              value={targetTime}
-              onChange={(e) => setTargetTime(e.target.value)}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={language === 'en' ? 'Enter goal description (optional)' : '输入目标描述（可选）'}
             />
           </div>
-        </div>
 
-        <div className="form-group">
-          <label>{t.goalType}</label>
-          <div className="category-grid">
-            {Object.entries(categoryColors).map(([cat, color]) => (
-              <button
-                key={cat}
-                className={`category-btn ${category === cat ? 'active' : ''}`}
-                onClick={() => setCategory(cat as CountdownEvent['category'])}
-                style={{ borderColor: color, backgroundColor: category === cat ? `${color}20` : 'transparent' }}
-              >
-                <span style={{ color }}>{getCategoryName(cat)}</span>
-              </button>
-            ))}
+          <div className="form-row">
+            <div className="form-group">
+              <label>{t.targetDate}</label>
+              <input
+                type="date"
+                className="edit-input"
+                value={targetDate}
+                onChange={(e) => setTargetDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            <div className="form-group">
+              <label>{t.targetTime}</label>
+              <input
+                type="time"
+                className="edit-input"
+                value={targetTime}
+                onChange={(e) => setTargetTime(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>{t.goalType}</label>
+            <div className="category-grid">
+              {Object.entries(categoryColors).map(([cat, color]) => (
+                <button
+                  key={cat}
+                  className={`category-btn ${category === cat ? 'active' : ''}`}
+                  onClick={() => setCategory(cat as CountdownEvent['category'])}
+                  style={{ borderColor: color, backgroundColor: category === cat ? `${color}20` : 'transparent' }}
+                >
+                  <span style={{ color }}>{getCategoryName(cat)}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
