@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, Download, Upload, Monitor, Sparkles, Eye, FileText, Clock, Palette, Database, Globe } from 'lucide-react';
+import { Settings, Download, Upload, Monitor, Sparkles, Eye, FileText, Clock, Palette, Database, Globe, X } from 'lucide-react';
 import { AppSettings, Language, ColorTheme } from '../types';
 import { useTranslation, getAvailableLanguages } from '../utils/i18n';
 
@@ -66,6 +66,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <Settings size={24} />
           <span>{t.settings}</span>
         </h2>
+        <button className="settings-close-btn" onClick={onClose}>
+          <X size={20} />
+        </button>
       </div>
 
       {/* 设置面板内容 */}
@@ -271,6 +274,14 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* 设置面板底部按钮 */}
+      <div className="settings-panel-footer">
+        <button className="btn btn-primary btn-large" onClick={onClose}>
+          <Check size={18} />
+          <span>{t.save}</span>
+        </button>
       </div>
     </div>
   );

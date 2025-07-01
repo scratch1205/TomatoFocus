@@ -6,6 +6,7 @@ import SettingsPanel from './SettingsPanel';
 import EditModal from './EditModal';
 import TaskGroupModal from './TaskGroupModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
+import MusicPlayer from './MusicPlayer';
 import Notification from './Notification';
 import FullscreenClock from './FullscreenClock';
 import { Task, TaskGroup, CheckinData, AppSettings, AppData, Language, ColorTheme } from '../types';
@@ -26,6 +27,7 @@ const PomodoroApp: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTaskGroupModal, setShowTaskGroupModal] = useState(false);
+  const [showMusicPlayer, setShowMusicPlayer] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [notification, setNotification] = useState({ show: false, message: '' });
   const [showFullscreenClock, setShowFullscreenClock] = useState(false);
@@ -616,11 +618,11 @@ ${t.dataExported} - ${t.appTitle}
           <span className="tooltip">{t.statistics}</span>
         </div>
         <div
-          className={`dock-item ${activePanel === 'noise' ? 'active' : ''}`}
-          onClick={() => setActivePanel('noise')}
+          className={`dock-item ${showMusicPlayer ? 'active' : ''}`}
+          onClick={() => setShowMusicPlayer(true)}
         >
           <Music size={24} />
-          <span className="tooltip">{t.whiteNoise}</span>
+          <span className="tooltip">{settings.language === 'en' ? 'Music Player' : '音乐播放器'}</span>
         </div>
         <div
           className={`dock-item ${showFullscreenClock ? 'active' : ''}`}
@@ -738,6 +740,15 @@ ${t.dataExported} - ${t.appTitle}
         timerStatus={isWorkTime ? t.working : t.resting}
         clockStyle={settings.clockStyle}
         enableAnimations={settings.enableAnimations}
+        language={settings.language}
+      />
+
+      {/* 音乐播放器 */}
+      <MusicPlayer
+        show={showMusicPlayer}
+        onClose={() => setShowMusicPlayer(false)}
+        glassEffect={settings.enableGlassEffect}
+        animations={settings.enableAnimations}
         language={settings.language}
       />
 

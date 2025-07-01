@@ -50,17 +50,19 @@ const TaskGroupModal: React.FC<TaskGroupModalProps> = ({
           <span>{t.createTaskGroup}</span>
         </h2>
         <div className="modal-body">
-          <div className="form-group">
-            <label className="form-label">{t.taskGroupName}</label>
-            <input
-              type="text"
-              className="edit-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder={language === 'en' ? 'Enter task group name' : '输入任务集名称'}
-              autoFocus
-            />
+          <div className="modal-scroll">
+            <div className="form-group">
+              <label className="form-label">{t.taskGroupName}</label>
+              <input
+                type="text"
+                className="edit-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder={language === 'en' ? 'Enter task group name' : '输入任务集名称'}
+                autoFocus
+              />
+            </div>
           </div>
         </div>
         <div className="edit-buttons">
