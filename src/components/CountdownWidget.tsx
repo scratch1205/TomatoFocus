@@ -385,73 +385,75 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
 
   return (
     <div className={`edit-modal ${show ? 'active' : ''}`}>
-      <div className="edit-content countdown-modal">
+      <div className="edit-content large-modal countdown-modal">
         <h2 className="edit-title">
           <Target size={24} />
           <span>{countdown ? t.editCountdown : t.addCountdown}</span>
         </h2>
         
-        <div className="modal-scroll">
-          <div className="form-group">
-            <label>{t.goalTitle}</label>
-            <input
-              type="text"
-              className="edit-input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder={language === 'en' ? 'Enter goal title' : '输入目标标题'}
-              autoFocus
-            />
-          </div>
-
-          <div className="form-group">
-            <label>{t.goalDescription}</label>
-            <input
-              type="text"
-              className="edit-input"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder={language === 'en' ? 'Enter goal description (optional)' : '输入目标描述（可选）'}
-            />
-          </div>
-
-          <div className="form-row">
+        <div className="modal-body">
+          <div className="modal-scroll">
             <div className="form-group">
-              <label>{t.targetDate}</label>
+              <label className="form-label">{t.goalTitle}</label>
               <input
-                type="date"
+                type="text"
                 className="edit-input"
-                value={targetDate}
-                onChange={(e) => setTargetDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder={language === 'en' ? 'Enter goal title' : '输入目标标题'}
+                autoFocus
               />
             </div>
+
             <div className="form-group">
-              <label>{t.targetTime}</label>
+              <label className="form-label">{t.goalDescription}</label>
               <input
-                type="time"
+                type="text"
                 className="edit-input"
-                value={targetTime}
-                onChange={(e) => setTargetTime(e.target.value)}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder={language === 'en' ? 'Enter goal description (optional)' : '输入目标描述（可选）'}
               />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label>{t.goalType}</label>
-            <div className="category-grid">
-              {Object.entries(categoryColors).map(([cat, color]) => (
-                <button
-                  key={cat}
-                  className={`category-btn ${category === cat ? 'active' : ''}`}
-                  onClick={() => setCategory(cat as CountdownEvent['category'])}
-                  style={{ borderColor: color, backgroundColor: category === cat ? `${color}20` : 'transparent' }}
-                >
-                  <span style={{ color }}>{getCategoryName(cat)}</span>
-                </button>
-              ))}
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">{t.targetDate}</label>
+                <input
+                  type="date"
+                  className="edit-input"
+                  value={targetDate}
+                  onChange={(e) => setTargetDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t.targetTime}</label>
+                <input
+                  type="time"
+                  className="edit-input"
+                  value={targetTime}
+                  onChange={(e) => setTargetTime(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">{t.goalType}</label>
+              <div className="category-grid">
+                {Object.entries(categoryColors).map(([cat, color]) => (
+                  <button
+                    key={cat}
+                    className={`category-btn ${category === cat ? 'active' : ''}`}
+                    onClick={() => setCategory(cat as CountdownEvent['category'])}
+                    style={{ borderColor: color, backgroundColor: category === cat ? `${color}20` : 'transparent' }}
+                  >
+                    <span style={{ color }}>{getCategoryName(cat)}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -461,7 +463,11 @@ const CountdownModal: React.FC<CountdownModalProps> = ({
             <X size={16} />
             <span>{t.cancel}</span>
           </button>
-          <button className="btn btn-primary" onClick={handleSave}>
+          <button 
+            className="btn btn-primary" 
+            onClick={handleSave}
+            disabled={!title.trim() || !targetDate || !targetTime}
+          >
             <Target size={16} />
             <span>{countdown ? t.update : t.add}</span>
           </button>

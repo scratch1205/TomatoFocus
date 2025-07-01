@@ -173,7 +173,7 @@ const PomodoroApp: React.FC = () => {
     }
   }, [workTime, breakTime, isWorkTime, isRunning]);
 
-  // Timer logic - Fixed to prevent infinite loops
+  // Timer logic - Fixed to prevent infinite loops and reset issues
   const tick = useCallback(() => {
     setTimeLeft(prev => {
       if (prev <= 1) {
@@ -259,8 +259,9 @@ const PomodoroApp: React.FC = () => {
     }
   };
 
+  // Fixed toggle timer - no reset on pause
   const toggleTimer = () => {
-    setIsRunning(!isRunning);
+    setIsRunning(prev => !prev);
   };
 
   const resetTimer = () => {

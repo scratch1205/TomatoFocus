@@ -127,10 +127,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="toggle-switch">
               <input
                 type="checkbox"
+                id="fullscreen-toggle"
                 checked={settings.enableFullscreen}
                 onChange={(e) => updateSetting('enableFullscreen', e.target.checked)}
               />
-              <span className="toggle-slider"></span>
+              <label htmlFor="fullscreen-toggle" className="toggle-slider"></label>
             </div>
           </div>
 
@@ -142,10 +143,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="toggle-switch">
               <input
                 type="checkbox"
+                id="glass-toggle"
                 checked={settings.enableGlassEffect}
                 onChange={(e) => updateSetting('enableGlassEffect', e.target.checked)}
               />
-              <span className="toggle-slider"></span>
+              <label htmlFor="glass-toggle" className="toggle-slider"></label>
             </div>
           </div>
 
@@ -157,10 +159,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="toggle-switch">
               <input
                 type="checkbox"
+                id="animations-toggle"
                 checked={settings.enableAnimations}
                 onChange={(e) => updateSetting('enableAnimations', e.target.checked)}
               />
-              <span className="toggle-slider"></span>
+              <label htmlFor="animations-toggle" className="toggle-slider"></label>
             </div>
           </div>
 

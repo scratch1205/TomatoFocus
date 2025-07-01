@@ -44,26 +44,31 @@ const TaskGroupModal: React.FC<TaskGroupModalProps> = ({
 
   return (
     <div className={`edit-modal ${show ? 'active' : ''}`}>
-      <div className="edit-content">
+      <div className="edit-content large-modal">
         <h2 className="edit-title">
           <Folder size={24} />
           <span>{t.createTaskGroup}</span>
         </h2>
-        <input
-          type="text"
-          className="edit-input"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={handleKeyPress}
-          placeholder={t.taskGroupName}
-          autoFocus
-        />
+        <div className="modal-body">
+          <div className="form-group">
+            <label className="form-label">{t.taskGroupName}</label>
+            <input
+              type="text"
+              className="edit-input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={language === 'en' ? 'Enter task group name' : '输入任务集名称'}
+              autoFocus
+            />
+          </div>
+        </div>
         <div className="edit-buttons">
           <button className="btn btn-outline" onClick={handleClose}>
             <X size={16} />
             <span>{t.cancel}</span>
           </button>
-          <button className="btn btn-primary" onClick={handleSave}>
+          <button className="btn btn-primary" onClick={handleSave} disabled={!name.trim()}>
             <Check size={16} />
             <span>{t.create}</span>
           </button>
