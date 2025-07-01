@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Music, Search, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Heart, Download } from 'lucide-react';
+import { Music, Search, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Heart, Download, Loader } from 'lucide-react';
 import { Language } from '../types';
 import { useTranslation } from '../utils/i18n';
 
 interface Song {
-  id: number;
+  id: string;
+  mid: string;
   name: string;
-  artist: string;
+  singer: string;
   album: string;
   duration: number;
-  picUrl: string;
+  pic: string;
   url?: string;
 }
 
@@ -39,111 +40,114 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [isMuted, setIsMuted] = useState(false);
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const t = useTranslation(language);
 
-  // 模拟网易云音乐API数据
-  const mockSongs: Song[] = [
-    {
-      id: 1,
-      name: "夜曲",
-      artist: "周杰伦",
-      album: "十一月的萧邦",
-      duration: 233,
-      picUrl: "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=300",
-      url: "https://music.163.com/song/media/outer/url?id=25906124.mp3"
-    },
-    {
-      id: 2,
-      name: "稻香",
-      artist: "周杰伦",
-      album: "魔杰座",
-      duration: 223,
-      picUrl: "https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300",
-      url: "https://music.163.com/song/media/outer/url?id=25906124.mp3"
-    },
-    {
-      id: 3,
-      name: "青花瓷",
-      artist: "周杰伦",
-      album: "我很忙",
-      duration: 228,
-      picUrl: "https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300",
-      url: "https://music.163.com/song/media/outer/url?id=25906124.mp3"
-    },
-    {
-      id: 4,
-      name: "告白气球",
-      artist: "周杰伦",
-      album: "周杰伦的床边故事",
-      duration: 207,
-      picUrl: "https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300",
-      url: "https://music.163.com/song/media/outer/url?id=25906124.mp3"
-    },
-    {
-      id: 5,
-      name: "晴天",
-      artist: "周杰伦",
-      album: "叶惠美",
-      duration: 269,
-      picUrl: "https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300",
-      url: "https://music.163.com/song/media/outer/url?id=25906124.mp3"
-    },
-    {
-      id: 6,
-      name: "Lofi Hip Hop",
-      artist: "ChillHop Music",
-      album: "Study Beats",
-      duration: 180,
-      picUrl: "https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300",
-      url: "https://music.163.com/song/media/outer/url?id=25906124.mp3"
-    },
-    {
-      id: 7,
-      name: "Peaceful Piano",
-      artist: "Relaxing Music",
-      album: "Focus & Study",
-      duration: 240,
-      picUrl: "https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300",
-      url: "https://music.163.com/song/media/outer/url?id=25906124.mp3"
-    },
-    {
-      id: 8,
-      name: "Nature Sounds",
-      artist: "Ambient Music",
-      album: "Concentration",
-      duration: 300,
-      picUrl: "https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300",
-      url: "https://music.163.com/song/media/outer/url?id=25906124.mp3"
-    }
-  ];
+  // QQ音乐API基础URL
+  const API_BASE = 'https://api.vkeys.cn/api/music/tencent';
 
   // 搜索音乐
-  const searchMusic = async () => {
-    if (!searchQuery.trim()) return;
+  const searchMusic = async (query: string, page: number = 1, append: boolean = false) => {
+    if (!query.trim()) return;
     
-    setIsLoading(true);
+    if (!append) {
+      setIsLoading(true);
+      setSearchResults([]);
+    } else {
+      setLoadingMore(true);
+    }
     
-    // 模拟API延迟
-    setTimeout(() => {
-      const results = mockSongs.filter(song => 
-        song.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        song.album.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setSearchResults(results);
+    try {
+      const response = await fetch(`${API_BASE}?word=${encodeURIComponent(query)}&page=${page}&num=20`);
+      const data = await response.json();
+      
+      if (data.code === 200 && data.data && data.data.list) {
+        const songs: Song[] = data.data.list.map((item: any) => ({
+          id: item.id || item.songid,
+          mid: item.mid || item.songmid,
+          name: item.name || item.songname,
+          singer: Array.isArray(item.singer) ? item.singer.map((s: any) => s.name).join(', ') : (item.singer || '未知歌手'),
+          album: item.album?.name || item.albumname || '未知专辑',
+          duration: item.interval || item.duration || 0,
+          pic: item.pic || item.albumpic || `https://y.qq.com/music/photo_new/T002R300x300M000${item.albummid}.jpg`
+        }));
+        
+        if (append) {
+          setSearchResults(prev => [...prev, ...songs]);
+        } else {
+          setSearchResults(songs);
+        }
+        
+        setHasMore(songs.length === 20);
+      } else {
+        console.error('API返回错误:', data);
+        if (!append) {
+          setSearchResults([]);
+        }
+      }
+    } catch (error) {
+      console.error('搜索音乐失败:', error);
+      if (!append) {
+        setSearchResults([]);
+      }
+    } finally {
       setIsLoading(false);
-    }, 500);
+      setLoadingMore(false);
+    }
+  };
+
+  // 获取音乐播放链接
+  const getMusicUrl = async (song: Song): Promise<string | null> => {
+    try {
+      const response = await fetch(`${API_BASE}?id=${song.id}&quality=14`);
+      const data = await response.json();
+      
+      if (data.code === 200 && data.data && data.data.url) {
+        return data.data.url;
+      }
+      
+      // 如果id获取失败，尝试使用mid
+      if (song.mid) {
+        const midResponse = await fetch(`${API_BASE}?mid=${song.mid}&quality=14`);
+        const midData = await midResponse.json();
+        
+        if (midData.code === 200 && midData.data && midData.data.url) {
+          return midData.data.url;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('获取音乐链接失败:', error);
+      return null;
+    }
   };
 
   // 播放歌曲
-  const playSong = (song: Song) => {
-    setCurrentSong(song);
-    setPlaylist(searchResults.length > 0 ? searchResults : mockSongs);
-    const index = (searchResults.length > 0 ? searchResults : mockSongs).findIndex(s => s.id === song.id);
-    setCurrentIndex(index);
-    setIsPlaying(true);
+  const playSong = async (song: Song) => {
+    setIsLoading(true);
+    
+    try {
+      const url = await getMusicUrl(song);
+      if (url) {
+        const songWithUrl = { ...song, url };
+        setCurrentSong(songWithUrl);
+        setPlaylist(searchResults.length > 0 ? searchResults : [songWithUrl]);
+        const index = searchResults.findIndex(s => s.id === song.id);
+        setCurrentIndex(index >= 0 ? index : 0);
+        setIsPlaying(true);
+      } else {
+        console.error('无法获取音乐播放链接');
+      }
+    } catch (error) {
+      console.error('播放歌曲失败:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 切换播放/暂停
@@ -163,8 +167,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     if (playlist.length > 0) {
       const newIndex = currentIndex > 0 ? currentIndex - 1 : playlist.length - 1;
       setCurrentIndex(newIndex);
-      setCurrentSong(playlist[newIndex]);
-      setIsPlaying(true);
+      playSong(playlist[newIndex]);
     }
   };
 
@@ -173,8 +176,15 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     if (playlist.length > 0) {
       const newIndex = currentIndex < playlist.length - 1 ? currentIndex + 1 : 0;
       setCurrentIndex(newIndex);
-      setCurrentSong(playlist[newIndex]);
-      setIsPlaying(true);
+      playSong(playlist[newIndex]);
+    }
+  };
+
+  // 加载更多
+  const loadMore = () => {
+    if (searchQuery.trim() && hasMore && !loadingMore) {
+      searchMusic(searchQuery, currentPage + 1, true);
+      setCurrentPage(prev => prev + 1);
     }
   };
 
@@ -222,24 +232,38 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       setIsPlaying(false);
       playNext();
     };
+    const handleError = () => {
+      console.error('音频播放错误');
+      setIsPlaying(false);
+    };
 
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('loadedmetadata', updateDuration);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
     return () => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
     };
   }, [currentSong]);
 
-  // 初始化搜索结果
-  useEffect(() => {
-    if (show && searchResults.length === 0) {
-      setSearchResults(mockSongs.slice(0, 6));
+  // 处理搜索
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      setCurrentPage(1);
+      searchMusic(searchQuery, 1, false);
     }
-  }, [show]);
+  };
+
+  // 处理回车搜索
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   if (!show) return null;
 
@@ -250,7 +274,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         <div className="music-player-header">
           <h2 className="music-player-title">
             <Music size={24} />
-            <span>{language === 'en' ? 'Music Player' : '音乐播放器'}</span>
+            <span>{language === 'en' ? 'QQ Music Player' : 'QQ音乐播放器'}</span>
           </h2>
           <button className="music-close-btn" onClick={onClose}>
             <X size={20} />
@@ -264,16 +288,16 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && searchMusic()}
+              onKeyPress={handleKeyPress}
               placeholder={language === 'en' ? 'Search songs, artists, albums...' : '搜索歌曲、歌手、专辑...'}
               className="music-search-input"
             />
             <button 
               className={`music-search-btn ${animations ? 'animated-btn' : ''}`}
-              onClick={searchMusic}
+              onClick={handleSearch}
               disabled={isLoading}
             >
-              <Search size={18} />
+              {isLoading ? <Loader size={18} className="animate-spin" /> : <Search size={18} />}
             </button>
           </div>
         </div>
@@ -283,13 +307,17 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
           <div className="current-playing-section">
             <div className="current-song-info">
               <img 
-                src={currentSong.picUrl} 
+                src={currentSong.pic} 
                 alt={currentSong.name}
                 className="current-song-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300';
+                }}
               />
               <div className="current-song-details">
                 <h3 className="current-song-name">{currentSong.name}</h3>
-                <p className="current-song-artist">{currentSong.artist}</p>
+                <p className="current-song-artist">{currentSong.singer}</p>
+                <p className="current-song-album">{currentSong.album}</p>
               </div>
             </div>
 
@@ -298,7 +326,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <button className="control-btn" onClick={playPrevious}>
                 <SkipBack size={20} />
               </button>
-              <button className="control-btn play-btn" onClick={togglePlayPause}>
+              <button className="control-btn play-btn" onClick={togglePlayPause} disabled={!currentSong.url}>
                 {isPlaying ? <Pause size={24} /> : <Play size={24} />}
               </button>
               <button className="control-btn" onClick={playNext}>
@@ -347,7 +375,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             )}
           </h3>
           
-          {isLoading ? (
+          {isLoading && searchResults.length === 0 ? (
             <div className="loading-state">
               <div className="loading-spinner"></div>
               <span>{language === 'en' ? 'Searching...' : '搜索中...'}</span>
@@ -357,18 +385,21 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <div className="music-list-scroll">
                 {searchResults.map((song) => (
                   <div
-                    key={song.id}
+                    key={`${song.id}-${song.mid}`}
                     className={`music-item ${currentSong?.id === song.id ? 'active' : ''} ${animations ? 'animated-card' : ''}`}
                     onClick={() => playSong(song)}
                   >
                     <img 
-                      src={song.picUrl} 
+                      src={song.pic} 
                       alt={song.name}
                       className="song-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.pexels.com/photos/1699161/pexels-photo-1699161.jpeg?auto=compress&cs=tinysrgb&w=300';
+                      }}
                     />
                     <div className="song-info">
                       <h4 className="song-name">{song.name}</h4>
-                      <p className="song-artist">{song.artist}</p>
+                      <p className="song-artist">{song.singer}</p>
                       <p className="song-album">{song.album}</p>
                     </div>
                     <div className="song-duration">
@@ -385,7 +416,27 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
                   </div>
                 ))}
                 
-                {searchResults.length === 0 && !isLoading && (
+                {/* 加载更多按钮 */}
+                {hasMore && searchResults.length > 0 && (
+                  <div className="load-more-section">
+                    <button 
+                      className={`btn btn-outline ${animations ? 'animated-btn' : ''}`}
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? (
+                        <>
+                          <Loader size={16} className="animate-spin" />
+                          <span>{language === 'en' ? 'Loading...' : '加载中...'}</span>
+                        </>
+                      ) : (
+                        <span>{language === 'en' ? 'Load More' : '加载更多'}</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+                
+                {searchResults.length === 0 && !isLoading && searchQuery && (
                   <div className="empty-state">
                     <Music size={48} />
                     <div className="empty-title">
@@ -396,19 +447,32 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
                     </div>
                   </div>
                 )}
+
+                {searchResults.length === 0 && !isLoading && !searchQuery && (
+                  <div className="empty-state">
+                    <Music size={48} />
+                    <div className="empty-title">
+                      {language === 'en' ? 'Start searching for music' : '开始搜索音乐'}
+                    </div>
+                    <div className="empty-desc">
+                      {language === 'en' ? 'Enter keywords to find your favorite songs' : '输入关键词找到你喜欢的歌曲'}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
 
         {/* 隐藏的音频元素 */}
-        {currentSong && (
+        {currentSong && currentSong.url && (
           <audio
             ref={audioRef}
             src={currentSong.url}
             autoPlay={isPlaying}
             volume={volume}
             muted={isMuted}
+            crossOrigin="anonymous"
           />
         )}
       </div>
