@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Music, Search, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Heart, Download } from 'lucide-react';
+import { Music, Search, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Heart, Download, Repeat, Repeat1, Shuffle } from 'lucide-react';
 import { Language } from '../types';
 import { useTranslation } from '../utils/i18n';
 
@@ -20,6 +20,7 @@ interface MusicPlayerProps {
   glassEffect: boolean;
   animations: boolean;
   language: Language;
+  onMinimize?: () => void;
 }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
@@ -27,7 +28,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   onClose,
   glassEffect,
   animations,
-  language
+  language,
+  onMinimize
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Song[]>([]);
@@ -42,6 +44,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [quality, setQuality] = useState('4'); // 默认HQ极高(320k)
   const [shouldPlayAfterLoad, setShouldPlayAfterLoad] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<'none' | 'one' | 'all'>('none');
+  const [isShuffled, setIsShuffled] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const t = useTranslation(language);
@@ -174,8 +178,42 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const playNext = () => {
     if (playlist.length === 0 || currentIndex === -1) return;
     
-    const newIndex = currentIndex < playlist.length - 1 ? currentIndex + 1 : 0;
+    let newIndex;
+    if (isShuffled) {
+      // 随机播放
+      do {
+        newIndex = Math.floor(Math.random() * playlist.length);
+      } while (newIndex === currentIndex && playlist.length > 1);
+    } else {
+      // 顺序播放
+      newIndex = currentIndex < playlist.length - 1 ? currentIndex + 1 : 0;
+    }
+    
     loadSong(playlist[newIndex].id, newIndex);
+  };
+
+  // 切换循环模式
+  const toggleRepeatMode = () => {
+    const modes: ('none' | 'one' | 'all')[] = ['none', 'one', 'all'];
+    const currentModeIndex = modes.indexOf(repeatMode);
+    const nextMode = modes[(currentModeIndex + 1) % modes.length];
+    setRepeatMode(nextMode);
+    
+    const modeNames = {
+      none: language === 'en' ? 'No repeat' : '不循环',
+      one: language === 'en' ? 'Repeat one' : '单曲循环',
+      all: language === 'en' ? 'Repeat all' : '列表循环'
+    };
+    showNotification(modeNames[nextMode]);
+  };
+
+  // 切换随机播放
+  const toggleShuffle = () => {
+    setIsShuffled(!isShuffled);
+    showNotification(isShuffled 
+      ? (language === 'en' ? 'Shuffle off' : '关闭随机播放')
+      : (language === 'en' ? 'Shuffle on' : '开启随机播放')
+    );
   };
 
   // 音量控制
@@ -232,6 +270,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     console.log(message);
   };
 
+  // 最小化到悬浮栏
+  const handleMinimize = () => {
+    if (onMinimize) {
+      onMinimize();
+    }
+    onClose();
+  };
+
   // 音频事件处理
   useEffect(() => {
     const audio = audioRef.current;
@@ -253,7 +299,16 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     
     const handleEnded = () => {
       setIsPlaying(false);
-      playNext();
+      
+      // 根据循环模式处理播放结束
+      if (repeatMode === 'one') {
+        // 单曲循环
+        audio.currentTime = 0;
+        audio.play();
+      } else if (repeatMode === 'all' || (repeatMode === 'none' && currentIndex < playlist.length - 1)) {
+        // 列表循环或顺序播放未到最后一首
+        playNext();
+      }
     };
     
     const handleError = () => {
@@ -290,7 +345,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
     };
-  }, [currentSong, shouldPlayAfterLoad, language]);
+  }, [currentSong, shouldPlayAfterLoad, language, repeatMode, currentIndex, playlist.length]);
 
   // 初始化音频设置
   useEffect(() => {
@@ -299,6 +354,18 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       audioRef.current.muted = isMuted;
     }
   }, [volume, isMuted]);
+
+  // 获取循环模式图标
+  const getRepeatIcon = () => {
+    switch (repeatMode) {
+      case 'one':
+        return <Repeat1 size={18} />;
+      case 'all':
+        return <Repeat size={18} />;
+      default:
+        return <Repeat size={18} />;
+    }
+  };
 
   if (!show) return null;
 
@@ -311,9 +378,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             <Music size={24} />
             <span>{language === 'en' ? 'NetEase Music Player' : '网易云音乐播放器'}</span>
           </h2>
-          <button className="music-close-btn" onClick={onClose}>
-            <X size={20} />
-          </button>
+          <div className="music-header-actions">
+            <button className="music-action-btn" onClick={handleMinimize} title={language === 'en' ? 'Minimize' : '最小化'}>
+              <Music size={18} />
+            </button>
+            <button className="music-close-btn" onClick={onClose}>
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* 搜索栏 */}
@@ -377,6 +449,13 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
             {/* 播放控制 */}
             <div className="music-controls">
+              <button 
+                className={`control-btn ${isShuffled ? 'active' : ''}`} 
+                onClick={toggleShuffle}
+                title={language === 'en' ? 'Shuffle' : '随机播放'}
+              >
+                <Shuffle size={18} />
+              </button>
               <button className="control-btn" onClick={playPrevious} disabled={playlist.length === 0}>
                 <SkipBack size={20} />
               </button>
@@ -385,6 +464,13 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               </button>
               <button className="control-btn" onClick={playNext} disabled={playlist.length === 0}>
                 <SkipForward size={20} />
+              </button>
+              <button 
+                className={`control-btn ${repeatMode !== 'none' ? 'active' : ''}`} 
+                onClick={toggleRepeatMode}
+                title={language === 'en' ? 'Repeat mode' : '循环模式'}
+              >
+                {getRepeatIcon()}
               </button>
             </div>
 
@@ -396,6 +482,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
                   <div 
                     className="progress-fill" 
                     style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max={duration || 0}
+                    value={currentTime}
+                    onChange={handleProgressChange}
+                    className="progress-slider"
                   />
                 </div>
               </div>
