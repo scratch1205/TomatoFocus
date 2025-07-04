@@ -7,22 +7,10 @@ import EditModal from './EditModal';
 import TaskGroupModal from './TaskGroupModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
 import MusicPlayer from './MusicPlayer';
-import FloatingMusicBar from './FloatingMusicBar';
 import Notification from './Notification';
 import FullscreenClock from './FullscreenClock';
 import { Task, TaskGroup, CheckinData, AppSettings, AppData, Language, ColorTheme } from '../types';
 import { useTranslation } from '../utils/i18n';
-
-interface Song {
-  id: string;
-  song: string;
-  singer: string;
-  album: string;
-  cover: string;
-  url: string;
-  quality: string;
-  interval: string;
-}
 
 const PomodoroApp: React.FC = () => {
   // Timer states
@@ -40,20 +28,9 @@ const PomodoroApp: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTaskGroupModal, setShowTaskGroupModal] = useState(false);
   const [showMusicPlayer, setShowMusicPlayer] = useState(false);
-  const [showFloatingMusicBar, setShowFloatingMusicBar] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [notification, setNotification] = useState({ show: false, message: '' });
   const [showFullscreenClock, setShowFullscreenClock] = useState(false);
-
-  // Music states
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const [musicCurrentTime, setMusicCurrentTime] = useState(0);
-  const [musicDuration, setMusicDuration] = useState(0);
-  const [musicVolume, setMusicVolume] = useState(0.7);
-  const [isMusicMuted, setIsMusicMuted] = useState(false);
-  const [playlist, setPlaylist] = useState<Song[]>([]);
-  const [currentMusicIndex, setCurrentMusicIndex] = useState(-1);
 
   // Task states
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -82,7 +59,6 @@ const PomodoroApp: React.FC = () => {
   // Refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const musicAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Get translations
   const t = useTranslation(settings.language);
@@ -408,73 +384,6 @@ const PomodoroApp: React.FC = () => {
     showNotificationMessage(t.checkinSuccess);
   };
 
-  // Music player handlers
-  const handleMusicMinimize = () => {
-    if (currentSong) {
-      setShowFloatingMusicBar(true);
-    }
-  };
-
-  const handleMusicTogglePlay = () => {
-    if (musicAudioRef.current) {
-      if (isMusicPlaying) {
-        musicAudioRef.current.pause();
-      } else {
-        musicAudioRef.current.play();
-      }
-    }
-  };
-
-  const handleMusicPrevious = () => {
-    if (playlist.length === 0 || currentMusicIndex === -1) return;
-    const newIndex = currentMusicIndex > 0 ? currentMusicIndex - 1 : playlist.length - 1;
-    setCurrentMusicIndex(newIndex);
-    // Load new song logic would go here
-  };
-
-  const handleMusicNext = () => {
-    if (playlist.length === 0 || currentMusicIndex === -1) return;
-    const newIndex = currentMusicIndex < playlist.length - 1 ? currentMusicIndex + 1 : 0;
-    setCurrentMusicIndex(newIndex);
-    // Load new song logic would go here
-  };
-
-  const handleMusicVolumeChange = (volume: number) => {
-    setMusicVolume(volume);
-    if (musicAudioRef.current) {
-      musicAudioRef.current.volume = volume;
-    }
-  };
-
-  const handleMusicToggleMute = () => {
-    setIsMusicMuted(!isMusicMuted);
-    if (musicAudioRef.current) {
-      musicAudioRef.current.muted = !isMusicMuted;
-    }
-  };
-
-  const handleMusicProgressChange = (time: number) => {
-    setMusicCurrentTime(time);
-    if (musicAudioRef.current) {
-      musicAudioRef.current.currentTime = time;
-    }
-  };
-
-  const handleFloatingMusicExpand = () => {
-    setShowFloatingMusicBar(false);
-    setShowMusicPlayer(true);
-  };
-
-  const handleFloatingMusicClose = () => {
-    setShowFloatingMusicBar(false);
-    setCurrentSong(null);
-    setIsMusicPlaying(false);
-    if (musicAudioRef.current) {
-      musicAudioRef.current.pause();
-      musicAudioRef.current.src = '';
-    }
-  };
-
   const exportData = () => {
     const data: AppData = {
       tasks,
@@ -685,9 +594,6 @@ ${t.dataExported} - ${t.appTitle}
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcBzWOzvLJe" type="audio/wav" />
       </audio>
 
-      {/* Hidden audio for music */}
-      <audio ref={musicAudioRef} />
-
       {/* macOS风格顶部任务栏 */}
       <div className={`macos-dock ${settings.enableGlassEffect ?'glass-effect' : 'solid-bg'} ${settings.enableAnimations ? 'animated' : ''}`}>
         <div
@@ -825,28 +731,6 @@ ${t.dataExported} - ${t.appTitle}
         />
       </div>
 
-      {/* 悬浮音乐播放栏 */}
-      <FloatingMusicBar
-        show={showFloatingMusicBar}
-        currentSong={currentSong}
-        isPlaying={isMusicPlaying}
-        currentTime={musicCurrentTime}
-        duration={musicDuration}
-        volume={musicVolume}
-        isMuted={isMusicMuted}
-        onTogglePlay={handleMusicTogglePlay}
-        onPrevious={handleMusicPrevious}
-        onNext={handleMusicNext}
-        onVolumeChange={handleMusicVolumeChange}
-        onToggleMute={handleMusicToggleMute}
-        onProgressChange={handleMusicProgressChange}
-        onExpand={handleFloatingMusicExpand}
-        onClose={handleFloatingMusicClose}
-        glassEffect={settings.enableGlassEffect}
-        animations={settings.enableAnimations}
-        language={settings.language}
-      />
-
       {/* 全屏翻页时钟 */}
       <FullscreenClock
         show={showFullscreenClock}
@@ -863,7 +747,6 @@ ${t.dataExported} - ${t.appTitle}
       <MusicPlayer
         show={showMusicPlayer}
         onClose={() => setShowMusicPlayer(false)}
-        onMinimize={handleMusicMinimize}
         glassEffect={settings.enableGlassEffect}
         animations={settings.enableAnimations}
         language={settings.language}

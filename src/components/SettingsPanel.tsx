@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, Download, Upload, Monitor, Sparkles, Eye, FileText, Clock, Palette, Database, Globe, X, Check } from 'lucide-react';
+import { Settings, Download, Upload, Monitor, Sparkles, Eye, FileText, Clock, Palette, Database, Globe, X } from 'lucide-react';
 import { AppSettings, Language, ColorTheme } from '../types';
 import { useTranslation, getAvailableLanguages } from '../utils/i18n';
 
