@@ -1,0 +1,375 @@
+/* 悬浮音乐播放器样式 */
+.floating-music-player {
+  position: fixed;
+  width: 320px;
+  height: 80px;
+  z-index: var(--z-toast);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.floating-music-player.glass-floating {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+}
+
+.floating-music-player.solid-floating {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 255, 255, 0.9) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.floating-music-player.animated-floating {
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-music-player:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 15px 50px rgba(0, 0, 0, 0.25),
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* 拖拽区域 */
+.floating-player-drag-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  cursor: grab;
+  z-index: 1;
+}
+
+.floating-player-drag-area:active {
+  cursor: grabbing;
+}
+
+/* 播放器内容 */
+.floating-player-content {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  height: 100%;
+  gap: 12px;
+  position: relative;
+}
+
+/* 封面容器 */
+.floating-cover-container {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.floating-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.floating-cover.rotating {
+  animation: rotate 10s linear infinite;
+}
+
+.floating-play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  color: white;
+}
+
+.floating-cover-container:hover .floating-play-overlay {
+  opacity: 1;
+}
+
+/* 歌曲信息 */
+.floating-song-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.floating-song-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.floating-artist-name {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+/* 控制按钮 */
+.floating-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.floating-control-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.floating-control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.floating-play-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+}
+
+.floating-play-btn:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+}
+
+/* 操作按钮 */
+.floating-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.floating-action-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.floating-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.floating-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* 进度条 */
+.floating-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.floating-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(67, 97, 238, 0.6);
+}
+
+/* 最小化状态 */
+.floating-music-player.minimized {
+  width: 200px;
+  height: 60px;
+}
+
+.floating-music-player.minimized .floating-player-content {
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.floating-music-player.minimized .floating-cover-container {
+  width: 44px;
+  height: 44px;
+}
+
+.floating-music-player.minimized .floating-controls {
+  gap: 2px;
+}
+
+.floating-music-player.minimized .floating-control-btn {
+  width: 28px;
+  height: 28px;
+}
+
+.floating-music-player.minimized .floating-play-btn {
+  width: 32px;
+  height: 32px;
+}
+
+/* 动画 */
+@keyframes slideInUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .floating-music-player {
+    width: 280px;
+    left: 50% !important;
+    transform: translateX(-50%);
+  }
+  
+  .floating-music-player.minimized {
+    width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-music-player {
+    width: calc(100vw - 40px);
+    left: 20px !important;
+    transform: none;
+  }
+  
+  .floating-music-player.minimized {
+    width: calc(100vw - 40px);
+  }
+  
+  .floating-player-content {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  
+  .floating-cover-container {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .floating-song-info {
+    min-width: 120px;
+  }
+}
+
+/* 主题适配 */
+[data-theme="white"] .floating-music-player.solid-floating {
+  background: linear-gradient(135deg, 
+    rgba(248, 250, 252, 0.95) 0%, 
+    rgba(241, 245, 249, 0.9) 100%);
+  color: var(--text-primary);
+}
+
+[data-theme="green"] .floating-music-player.solid-floating {
+  background: linear-gradient(135deg, 
+    rgba(209, 250, 229, 0.95) 0%, 
+    rgba(167, 243, 208, 0.9) 100%);
+}
+
+[data-theme="purple"] .floating-music-player.solid-floating {
+  background: linear-gradient(135deg, 
+    rgba(237, 233, 254, 0.95) 0%, 
+    rgba(221, 214, 254, 0.9) 100%);
+}
+
+[data-theme="orange"] .floating-music-player.solid-floating {
+  background: linear-gradient(135deg, 
+    rgba(254, 215, 170, 0.95) 0%, 
+    rgba(253, 186, 116, 0.9) 100%);
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .floating-music-player {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .floating-control-btn,
+  .floating-action-btn {
+    border: 1px solid var(--text-secondary);
+  }
+}
+
+/* 减少动画模式 */
+@media (prefers-reduced-motion: reduce) {
+  .floating-music-player,
+  .floating-cover,
+  .floating-control-btn,
+  .floating-action-btn,
+  .floating-progress-fill {
+    transition: none;
+  }
+  
+  .floating-cover.rotating {
+    animation: none;
+  }
+  
+  .floating-music-player.animated-floating {
+    animation: none;
+  }
+}

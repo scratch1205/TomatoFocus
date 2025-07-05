@@ -21,6 +21,10 @@ interface MusicPlayerProps {
   animations: boolean;
   language: Language;
   onMinimize?: () => void;
+  // 新增的回调函数，用于与悬浮播放器通信
+  onSongChange?: (song: Song | null) => void;
+  onPlayStateChange?: (isPlaying: boolean) => void;
+  onPlaylistChange?: (playlist: Song[], currentIndex: number) => void;
 }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
@@ -29,7 +33,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   glassEffect,
   animations,
   language,
-  onMinimize
+  onMinimize,
+  onSongChange,
+  onPlayStateChange,
+  onPlaylistChange
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Song[]>([]);
@@ -77,6 +84,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         const songs = Array.isArray(data.data) ? data.data : [data.data];
         setSearchResults(songs);
         setPlaylist(songs);
+        // 通知父组件播放列表变化
+        if (onPlaylistChange) {
+          onPlaylistChange(songs, -1);
+        }
         showNotification(`${language === 'en' ? 'Found' : '找到'} ${songs.length} ${language === 'en' ? 'songs' : '首歌曲'}`);
       } else {
         setSearchResults([]);
@@ -104,6 +115,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       if (isPlaying && audioRef.current) {
         audioRef.current.pause();
         setIsPlaying(false);
+        // 通知父组件播放状态变化
+        if (onPlayStateChange) {
+          onPlayStateChange(false);
+        }
       }
       
       // 重置音频元素
@@ -117,6 +132,16 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       if (data.code === 200 && data.data) {
         setCurrentSong(data.data);
         setCurrentIndex(index);
+        
+        // 通知父组件歌曲变化
+        if (onSongChange) {
+          onSongChange(data.data);
+        }
+        
+        // 通知父组件播放列表变化
+        if (onPlaylistChange) {
+          onPlaylistChange(playlist, index);
+        }
         
         // 设置新的音频源
         if (audioRef.current) {
@@ -288,6 +313,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     
     const handlePlay = () => {
       setIsPlaying(true);
+      // 通知父组件播放状态变化
+      if (onPlayStateChange) {
+        onPlayStateChange(true);
+      }
       if (currentSong) {
         showNotification(`${language === 'en' ? 'Now playing' : '正在播放'}: ${currentSong.song}`);
       }
@@ -295,10 +324,18 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     
     const handlePause = () => {
       setIsPlaying(false);
+      // 通知父组件播放状态变化
+      if (onPlayStateChange) {
+        onPlayStateChange(false);
+      }
     };
     
     const handleEnded = () => {
       setIsPlaying(false);
+      // 通知父组件播放状态变化
+      if (onPlayStateChange) {
+        onPlayStateChange(false);
+      }
       
       // 根据循环模式处理播放结束
       if (repeatMode === 'one') {
@@ -316,6 +353,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       showNotification(`${language === 'en' ? 'Play error' : '播放错误'}: ${audio.error?.message || language === 'en' ? 'Unknown error' : '未知错误'}`);
       setIsPlaying(false);
       setShouldPlayAfterLoad(false);
+      // 通知父组件播放状态变化
+      if (onPlayStateChange) {
+        onPlayStateChange(false);
+      }
     };
     
     const handleCanPlay = () => {
@@ -345,7 +386,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
     };
-  }, [currentSong, shouldPlayAfterLoad, language, repeatMode, currentIndex, playlist.length]);
+  }, [currentSong, shouldPlayAfterLoad, language, repeatMode, currentIndex, playlist.length, onPlayStateChange]);
 
   // 初始化音频设置
   useEffect(() => {
@@ -366,6 +407,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         return <Repeat size={18} />;
     }
   };
+
+  // 暴露控制方法给父组件
+  useEffect(() => {
+    // 将控制方法绑定到 window 对象，供悬浮播放器调用
+    (window as any).musicPlayerControls = {
+      togglePlayPause,
+      playPrevious,
+      playNext,
+      currentSong,
+      isPlaying,
+      playlist,
+      currentIndex
+    };
+
+    return () => {
+      // 清理
+      delete (window as any).musicPlayerControls;
+    };
+  }, [currentSong, isPlaying, playlist, currentIndex]);
 
   if (!show) return null;
 

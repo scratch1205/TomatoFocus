@@ -7,10 +7,23 @@ import EditModal from './EditModal';
 import TaskGroupModal from './TaskGroupModal';
 import WhiteNoisePlayer from './WhiteNoisePlayer';
 import MusicPlayer from './MusicPlayer';
+import FloatingMusicPlayer from './FloatingMusicPlayer';
 import Notification from './Notification';
 import FullscreenClock from './FullscreenClock';
 import { Task, TaskGroup, CheckinData, AppSettings, AppData, Language, ColorTheme } from '../types';
 import { useTranslation } from '../utils/i18n';
+
+// 定义歌曲接口
+interface Song {
+  id: string;
+  song: string;
+  singer: string;
+  album: string;
+  cover: string;
+  url: string;
+  quality: string;
+  interval: string;
+}
 
 const PomodoroApp: React.FC = () => {
   // Timer states
@@ -31,6 +44,13 @@ const PomodoroApp: React.FC = () => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [notification, setNotification] = useState({ show: false, message: '' });
   const [showFullscreenClock, setShowFullscreenClock] = useState(false);
+
+  // Music states
+  const [showFloatingPlayer, setShowFloatingPlayer] = useState(false);
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [musicPlaylist, setMusicPlaylist] = useState<Song[]>([]);
+  const [currentMusicIndex, setCurrentMusicIndex] = useState(-1);
 
   // Task states
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -587,6 +607,62 @@ ${t.dataExported} - ${t.appTitle}
     return ((total - timeLeft) / total) * 283; // 283 is circumference for r=45
   };
 
+  // Music player handlers
+  const handleSongChange = (song: Song | null) => {
+    setCurrentSong(song);
+  };
+
+  const handlePlayStateChange = (isPlaying: boolean) => {
+    setIsMusicPlaying(isPlaying);
+    // 如果音乐开始播放且音乐窗口关闭，显示悬浮播放器
+    if (isPlaying && !showMusicPlayer && currentSong) {
+      setShowFloatingPlayer(true);
+    }
+  };
+
+  const handlePlaylistChange = (playlist: Song[], currentIndex: number) => {
+    setMusicPlaylist(playlist);
+    setCurrentMusicIndex(currentIndex);
+  };
+
+  const handleMusicPlayerMinimize = () => {
+    setShowMusicPlayer(false);
+    if (currentSong && isMusicPlaying) {
+      setShowFloatingPlayer(true);
+    }
+  };
+
+  // 悬浮播放器控制方法
+  const handleFloatingTogglePlay = () => {
+    const controls = (window as any).musicPlayerControls;
+    if (controls) {
+      controls.togglePlayPause();
+    }
+  };
+
+  const handleFloatingPrevious = () => {
+    const controls = (window as any).musicPlayerControls;
+    if (controls) {
+      controls.playPrevious();
+    }
+  };
+
+  const handleFloatingNext = () => {
+    const controls = (window as any).musicPlayerControls;
+    if (controls) {
+      controls.playNext();
+    }
+  };
+
+  const handleFloatingClose = () => {
+    setShowFloatingPlayer(false);
+  };
+
+  const handleFloatingExpand = () => {
+    setShowFloatingPlayer(false);
+    setShowMusicPlayer(true);
+  };
+
   return (
     <>
       {/* Hidden audio for notifications */}
@@ -750,6 +826,25 @@ ${t.dataExported} - ${t.appTitle}
         glassEffect={settings.enableGlassEffect}
         animations={settings.enableAnimations}
         language={settings.language}
+        onMinimize={handleMusicPlayerMinimize}
+        onSongChange={handleSongChange}
+        onPlayStateChange={handlePlayStateChange}
+        onPlaylistChange={handlePlaylistChange}
+      />
+
+      {/* 悬浮音乐播放器 */}
+      <FloatingMusicPlayer
+        show={showFloatingPlayer}
+        currentSong={currentSong}
+        isPlaying={isMusicPlaying}
+        onTogglePlay={handleFloatingTogglePlay}
+        onPrevious={handleFloatingPrevious}
+        onNext={handleFloatingNext}
+        onClose={handleFloatingClose}
+        onExpand={handleFloatingExpand}
+        language={settings.language}
+        glassEffect={settings.enableGlassEffect}
+        animations={settings.enableAnimations}
       />
 
       {/* 设置面板 */}
