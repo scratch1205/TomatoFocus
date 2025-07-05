@@ -115,7 +115,7 @@
 -   **界面效果**: 开启/关闭毛玻璃效果、动画效果。
 -   **全屏时钟样式**: 数字、翻页、模拟。
 -   **颜色主题**: 蓝色、白色、绿色、紫色、橙色。
--   **语言**: 简体中文、繁体中文、英文、新加坡中文。
+-   **语言**: 简体中文、繁体中文、英文。
 -   **数据管理**: 导出/导入应用数据。
 
 ## 贡献
@@ -133,6 +133,7 @@
 -   感谢 [React](https://react.dev/)、[TypeScript](https://www.typescriptlang.org/)、[Vite](https://vitejs.dev/)、[Tailwind CSS](https://tailwindcss.com/) 等优秀开源项目。
 -   感谢 [Lucide React](https://lucide.dev/icons/) 提供的精美图标。
 -   感谢 [Chart.js](https://www.chartjs.org/) 和 [React Chart.js 2](https://react-chartjs-2.js.org/) 提供的图表解决方案。
+-   感谢 [落月API](https://doc.vkeys.cn/api-doc/v3/) 提供的网易云音乐API。
 -   感谢所有为本项目提供灵感、建议和贡献的朋友们。
 
 
