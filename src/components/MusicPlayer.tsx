@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Music, Search, Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, Heart, Download, Repeat, Repeat1, Shuffle } from 'lucide-react';
 import { Language } from '../types';
 import { useTranslation } from '../utils/i18n';
@@ -25,26 +25,6 @@ interface MusicPlayerProps {
   onSongChange?: (song: Song | null) => void;
   onPlayStateChange?: (isPlaying: boolean) => void;
   onPlaylistChange?: (playlist: Song[], currentIndex: number) => void;
-  // 从父组件传递的音频引用和控制方法
-  audioRef?: React.RefObject<HTMLAudioElement>;
-  loadSong?: (songId: string, index: number) => void;
-  togglePlay?: () => void;
-  playPrevious?: () => void;
-  playNext?: () => void;
-  currentSong?: Song | null;
-  isPlaying?: boolean;
-  playlist?: Song[];
-  currentIndex?: number;
-  volume?: number;
-  setVolume?: (volume: number) => void;
-  isMuted?: boolean;
-  setIsMuted?: (muted: boolean) => void;
-  currentTime?: number;
-  duration?: number;
-  repeatMode?: 'none' | 'one' | 'all';
-  setRepeatMode?: (mode: 'none' | 'one' | 'all') => void;
-  isShuffled?: boolean;
-  setIsShuffled?: (shuffled: boolean) => void;
 }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({
@@ -56,31 +36,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   onMinimize,
   onSongChange,
   onPlayStateChange,
-  onPlaylistChange,
-  audioRef,
-  loadSong,
-  togglePlay,
-  playPrevious,
-  playNext,
-  currentSong,
-  isPlaying = false,
-  playlist = [],
-  currentIndex = -1,
-  volume = 0.7,
-  setVolume,
-  isMuted = false,
-  setIsMuted,
-  currentTime = 0,
-  duration = 0,
-  repeatMode = 'none',
-  setRepeatMode,
-  isShuffled = false,
-  setIsShuffled
+  onPlaylistChange
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Song[]>([]);
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.7);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [playlist, setPlaylist] = useState<Song[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const [quality, setQuality] = useState('4'); // 默认HQ极高(320k)
+  const [shouldPlayAfterLoad, setShouldPlayAfterLoad] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<'none' | 'one' | 'all'>('none');
+  const [isShuffled, setIsShuffled] = useState(false);
+  
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const t = useTranslation(language);
 
   // 音质选项
@@ -109,6 +83,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       if (data.code === 200 && data.data) {
         const songs = Array.isArray(data.data) ? data.data : [data.data];
         setSearchResults(songs);
+        setPlaylist(songs);
         // 通知父组件播放列表变化
         if (onPlaylistChange) {
           onPlaylistChange(songs, -1);
@@ -127,88 +102,174 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
   };
 
+  // 加载歌曲
+  const loadSong = async (songId: string, index: number) => {
+    setIsLoading(true);
+    showNotification(language === 'en' ? 'Loading music...' : '正在获取音乐信息...');
+    
+    try {
+      // 保存当前播放状态
+      const wasPlaying = isPlaying;
+      
+      // 停止当前播放
+      if (isPlaying && audioRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+        // 通知父组件播放状态变化
+        if (onPlayStateChange) {
+          onPlayStateChange(false);
+        }
+      }
+      
+      // 重置音频元素
+      if (audioRef.current) {
+        audioRef.current.src = '';
+      }
+      
+      const response = await fetch(`https://api.vkeys.cn/v2/music/netease?id=${songId}&quality=${quality}`);
+      const data = await response.json();
+      
+      if (data.code === 200 && data.data) {
+        setCurrentSong(data.data);
+        setCurrentIndex(index);
+        
+        // 通知父组件歌曲变化
+        if (onSongChange) {
+          onSongChange(data.data);
+        }
+        
+        // 通知父组件播放列表变化
+        if (onPlaylistChange) {
+          onPlaylistChange(playlist, index);
+        }
+        
+        // 设置新的音频源
+        if (audioRef.current) {
+          audioRef.current.src = data.data.url;
+          audioRef.current.load();
+        }
+        
+        // 如果之前是播放状态，则继续播放
+        if (wasPlaying) {
+          setShouldPlayAfterLoad(true);
+        }
+        
+        showNotification(language === 'en' ? 'Music loaded' : '音乐已加载');
+      } else {
+        showNotification(data.message || (language === 'en' ? 'Failed to load music' : '获取音乐失败'));
+      }
+    } catch (error) {
+      console.error('获取音乐失败:', error);
+      showNotification(`${language === 'en' ? 'Failed to load music' : '获取音乐失败'}: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 播放歌曲
   const playSong = (song: Song, index: number) => {
-    if (loadSong) {
-      loadSong(song.id, index);
-    }
+    loadSong(song.id, index);
   };
 
   // 切换播放/暂停
   const togglePlayPause = () => {
-    if (togglePlay) {
-      togglePlay();
+    if (!currentSong) {
+      showNotification(language === 'en' ? 'Please select a song first' : '请先选择音乐');
+      return;
+    }
+
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        setShouldPlayAfterLoad(true);
+        audioRef.current.play().catch(error => {
+          console.error('播放失败:', error);
+          showNotification(`${language === 'en' ? 'Play failed' : '播放失败'}: ${error.message}`);
+        });
+      }
     }
   };
 
   // 上一首
-  const playPreviousSong = () => {
-    if (playPrevious) {
-      playPrevious();
-    }
+  const playPrevious = () => {
+    if (playlist.length === 0 || currentIndex === -1) return;
+    
+    const newIndex = currentIndex > 0 ? currentIndex - 1 : playlist.length - 1;
+    loadSong(playlist[newIndex].id, newIndex);
   };
 
   // 下一首
-  const playNextSong = () => {
-    if (playNext) {
-      playNext();
+  const playNext = () => {
+    if (playlist.length === 0 || currentIndex === -1) return;
+    
+    let newIndex;
+    if (isShuffled) {
+      // 随机播放
+      do {
+        newIndex = Math.floor(Math.random() * playlist.length);
+      } while (newIndex === currentIndex && playlist.length > 1);
+    } else {
+      // 顺序播放
+      newIndex = currentIndex < playlist.length - 1 ? currentIndex + 1 : 0;
     }
+    
+    loadSong(playlist[newIndex].id, newIndex);
   };
 
   // 切换循环模式
   const toggleRepeatMode = () => {
-    if (setRepeatMode) {
-      const modes: ('none' | 'one' | 'all')[] = ['none', 'one', 'all'];
-      const currentModeIndex = modes.indexOf(repeatMode);
-      const nextMode = modes[(currentModeIndex + 1) % modes.length];
-      setRepeatMode(nextMode);
-      
-      const modeNames = {
-        none: language === 'en' ? 'No repeat' : '不循环',
-        one: language === 'en' ? 'Repeat one' : '单曲循环',
-        all: language === 'en' ? 'Repeat all' : '列表循环'
-      };
-      showNotification(modeNames[nextMode]);
-    }
+    const modes: ('none' | 'one' | 'all')[] = ['none', 'one', 'all'];
+    const currentModeIndex = modes.indexOf(repeatMode);
+    const nextMode = modes[(currentModeIndex + 1) % modes.length];
+    setRepeatMode(nextMode);
+    
+    const modeNames = {
+      none: language === 'en' ? 'No repeat' : '不循环',
+      one: language === 'en' ? 'Repeat one' : '单曲循环',
+      all: language === 'en' ? 'Repeat all' : '列表循环'
+    };
+    showNotification(modeNames[nextMode]);
   };
 
   // 切换随机播放
   const toggleShuffle = () => {
-    if (setIsShuffled) {
-      setIsShuffled(!isShuffled);
-      showNotification(isShuffled 
-        ? (language === 'en' ? 'Shuffle off' : '关闭随机播放')
-        : (language === 'en' ? 'Shuffle on' : '开启随机播放')
-      );
-    }
+    setIsShuffled(!isShuffled);
+    showNotification(isShuffled 
+      ? (language === 'en' ? 'Shuffle off' : '关闭随机播放')
+      : (language === 'en' ? 'Shuffle on' : '开启随机播放')
+    );
   };
 
   // 音量控制
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
-    if (setVolume) {
-      setVolume(newVolume);
+    setVolume(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
     }
   };
 
   // 静音切换
   const toggleMute = () => {
-    if (setIsMuted) {
-      setIsMuted(!isMuted);
+    setIsMuted(!isMuted);
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
     }
   };
 
   // 进度条控制
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
-    if (audioRef?.current) {
+    setCurrentTime(newTime);
+    if (audioRef.current) {
       audioRef.current.currentTime = newTime;
     }
   };
 
   // 进度条点击
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef?.current || !duration) return;
+    if (!audioRef.current || !duration) return;
     
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -216,6 +277,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     const newTime = (clickX / width) * duration;
     
     audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
   };
 
   // 格式化时间
@@ -241,6 +303,99 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     onClose();
   };
 
+  // 音频事件处理
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const updateTime = () => setCurrentTime(audio.currentTime);
+    const updateDuration = () => setDuration(audio.duration);
+    
+    const handlePlay = () => {
+      setIsPlaying(true);
+      // 通知父组件播放状态变化
+      if (onPlayStateChange) {
+        onPlayStateChange(true);
+      }
+      if (currentSong) {
+        showNotification(`${language === 'en' ? 'Now playing' : '正在播放'}: ${currentSong.song}`);
+      }
+    };
+    
+    const handlePause = () => {
+      setIsPlaying(false);
+      // 通知父组件播放状态变化
+      if (onPlayStateChange) {
+        onPlayStateChange(false);
+      }
+    };
+    
+    const handleEnded = () => {
+      setIsPlaying(false);
+      // 通知父组件播放状态变化
+      if (onPlayStateChange) {
+        onPlayStateChange(false);
+      }
+      
+      // 根据循环模式处理播放结束
+      if (repeatMode === 'one') {
+        // 单曲循环
+        audio.currentTime = 0;
+        audio.play();
+      } else if (repeatMode === 'all' || (repeatMode === 'none' && currentIndex < playlist.length - 1)) {
+        // 列表循环或顺序播放未到最后一首
+        playNext();
+      }
+    };
+    
+    const handleError = () => {
+      console.error('播放错误:', audio.error);
+      showNotification(`${language === 'en' ? 'Play error' : '播放错误'}: ${audio.error?.message || language === 'en' ? 'Unknown error' : '未知错误'}`);
+      setIsPlaying(false);
+      setShouldPlayAfterLoad(false);
+      // 通知父组件播放状态变化
+      if (onPlayStateChange) {
+        onPlayStateChange(false);
+      }
+    };
+    
+    const handleCanPlay = () => {
+      if (shouldPlayAfterLoad) {
+        audio.play().catch(error => {
+          console.error('自动播放失败:', error);
+          showNotification(`${language === 'en' ? 'Auto play failed' : '自动播放失败'}: ${error.message}`);
+        });
+        setShouldPlayAfterLoad(false);
+      }
+    };
+
+    audio.addEventListener('timeupdate', updateTime);
+    audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('canplay', handleCanPlay);
+
+    return () => {
+      audio.removeEventListener('timeupdate', updateTime);
+      audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplay', handleCanPlay);
+    };
+  }, [currentSong, shouldPlayAfterLoad, language, repeatMode, currentIndex, playlist.length, onPlayStateChange]);
+
+  // 初始化音频设置
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      audioRef.current.muted = isMuted;
+    }
+  }, [volume, isMuted]);
+
   // 获取循环模式图标
   const getRepeatIcon = () => {
     switch (repeatMode) {
@@ -252,6 +407,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         return <Repeat size={18} />;
     }
   };
+
+  // 暴露控制方法给父组件
+  useEffect(() => {
+    // 将控制方法绑定到 window 对象，供悬浮播放器调用
+    (window as any).musicPlayerControls = {
+      togglePlayPause,
+      playPrevious,
+      playNext,
+      currentSong,
+      isPlaying,
+      playlist,
+      currentIndex
+    };
+
+    return () => {
+      // 清理
+      delete (window as any).musicPlayerControls;
+    };
+  }, [currentSong, isPlaying, playlist, currentIndex]);
 
   if (!show) return null;
 
@@ -342,13 +516,13 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               >
                 <Shuffle size={18} />
               </button>
-              <button className="control-btn" onClick={playPreviousSong} disabled={playlist.length === 0}>
+              <button className="control-btn" onClick={playPrevious} disabled={playlist.length === 0}>
                 <SkipBack size={20} />
               </button>
               <button className="control-btn play-btn" onClick={togglePlayPause}>
                 {isPlaying ? <Pause size={24} /> : <Play size={24} />}
               </button>
-              <button className="control-btn" onClick={playNextSong} disabled={playlist.length === 0}>
+              <button className="control-btn" onClick={playNext} disabled={playlist.length === 0}>
                 <SkipForward size={20} />
               </button>
               <button 
@@ -462,6 +636,9 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             </div>
           )}
         </div>
+
+        {/* 隐藏的音频元素 */}
+        <audio ref={audioRef} />
       </div>
     </div>
   );
