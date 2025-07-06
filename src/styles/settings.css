@@ -1,0 +1,301 @@
+/* 设置面板样式 */
+
+.settings-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-left: 1px solid var(--glass-border);
+  z-index: var(--z-modal);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px var(--shadow);
+}
+
+.settings-panel.active {
+  transform: translateX(0);
+}
+
+/* 设置面板头部 */
+.settings-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.settings-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.settings-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* 设置面板内容 */
+.settings-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* 设置部分 */
+.setting-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* 设置组 */
+.setting-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.setting-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* 主题选择器 */
+.theme-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.theme-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--glass-border);
+}
+
+.theme-option.active {
+  border-color: var(--primary);
+  background: rgba(67, 97, 238, 0.1);
+}
+
+.theme-preview {
+  width: 40px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.theme-circle {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.blue-theme {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.blue-theme .theme-circle:nth-child(1) { background: #4361ee; }
+.blue-theme .theme-circle:nth-child(2) { background: #4cc9f0; }
+.blue-theme .theme-circle:nth-child(3) { background: #7209b7; }
+
+.white-theme {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.white-theme .theme-circle:nth-child(1) { background: #2563eb; }
+.white-theme .theme-circle:nth-child(2) { background: #06b6d4; }
+.white-theme .theme-circle:nth-child(3) { background: #8b5cf6; }
+
+.green-theme {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.green-theme .theme-circle:nth-child(1) { background: #059669; }
+.green-theme .theme-circle:nth-child(2) { background: #10b981; }
+.green-theme .theme-circle:nth-child(3) { background: #22c55e; }
+
+.purple-theme {
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+}
+
+.purple-theme .theme-circle:nth-child(1) { background: #7c3aed; }
+.purple-theme .theme-circle:nth-child(2) { background: #8b5cf6; }
+.purple-theme .theme-circle:nth-child(3) { background: #ec4899; }
+
+.orange-theme {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+}
+
+.orange-theme .theme-circle:nth-child(1) { background: #ea580c; }
+.orange-theme .theme-circle:nth-child(2) { background: #f97316; }
+.orange-theme .theme-circle:nth-child(3) { background: #fb923c; }
+
+.theme-option span {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* 语言选择器 */
+.language-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.language-option {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: var(--font-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.language-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--primary);
+}
+
+.language-option.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* 导出按钮 */
+.export-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.import-section {
+  margin-top: var(--spacing-md);
+}
+
+/* 设置面板底部 */
+.settings-panel-footer {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* 响应式设置面板 */
+@media (max-width: 768px) {
+  .settings-panel {
+    width: 100%;
+    right: 0;
+  }
+  
+  .settings-panel-content {
+    padding: var(--spacing-md);
+    gap: var(--spacing-lg);
+  }
+  
+  .setting-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .theme-selector {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .language-selector {
+    grid-template-columns: 1fr;
+  }
+  
+  .export-buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-panel-header,
+  .settings-panel-content,
+  .settings-panel-footer {
+    padding: var(--spacing-md);
+  }
+  
+  .setting-section {
+    gap: var(--spacing-md);
+  }
+  
+  .theme-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .theme-preview {
+    width: 32px;
+    height: 20px;
+  }
+  
+  .theme-circle {
+    width: 4px;
+    height: 4px;
+  }
+}

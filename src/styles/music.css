@@ -1,0 +1,487 @@
+/* 音乐播放器样式 */
+
+.music-player-modal {
+  padding: var(--spacing-lg);
+}
+
+.music-player-container {
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* 音乐播放器头部 */
+.music-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.music-player-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.music-header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.music-action-btn,
+.music-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.music-action-btn:hover,
+.music-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* 搜索部分 */
+.music-search-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.music-search-bar {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.music-search-input {
+  flex: 1;
+}
+
+.music-search-btn {
+  padding: 12px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.music-search-btn:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.music-search-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quality-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.quality-label {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* 当前播放部分 */
+.current-playing-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.current-song-info {
+  display: flex;
+  gap: var(--spacing-lg);
+  align-items: center;
+}
+
+.current-song-cover {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  box-shadow: 0 8px 24px var(--shadow);
+  transition: transform 0.3s ease;
+}
+
+.current-song-cover.rotating {
+  animation: rotate 10s linear infinite;
+}
+
+.current-song-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.current-song-name {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.current-song-artist {
+  font-size: var(--font-base);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.current-song-album {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.current-song-meta {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin-top: var(--spacing-sm);
+}
+
+/* 音乐控制 */
+.music-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+/* 进度条部分 */
+.progress-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.time-display {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-family: 'Inter', monospace;
+  min-width: 40px;
+  text-align: center;
+}
+
+.progress-container {
+  flex: 1;
+  cursor: pointer;
+}
+
+.progress-track {
+  position: relative;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(67, 97, 238, 0.6);
+}
+
+.progress-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* 音量控制 */
+.volume-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.volume-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.volume-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.volume-slider {
+  width: 80px;
+}
+
+/* 搜索结果部分 */
+.music-results-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  min-height: 0;
+}
+
+.results-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.results-count {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  gap: var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+/* 音乐列表 */
+.music-list {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.music-list-scroll {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: var(--spacing-xs);
+  margin-right: calc(-1 * var(--spacing-xs));
+}
+
+.music-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.music-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.music-item.active {
+  background: rgba(67, 97, 238, 0.1);
+  border-color: var(--primary);
+}
+
+.song-cover {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.song-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.song-name {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-artist {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-album {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-duration {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-family: 'Inter', monospace;
+}
+
+.song-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.music-item:hover .song-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* 响应式音乐播放器 */
+@media (max-width: 768px) {
+  .music-player-modal {
+    padding: var(--spacing-md);
+  }
+  
+  .music-player-container {
+    max-height: 95vh;
+    gap: var(--spacing-md);
+  }
+  
+  .current-song-info {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-md);
+  }
+  
+  .current-song-cover {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .music-controls {
+    gap: var(--spacing-sm);
+  }
+  
+  .progress-section {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .volume-section {
+    justify-content: center;
+  }
+  
+  .music-search-bar {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .quality-selector {
+    justify-content: center;
+  }
+  
+  .song-actions {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .music-player-modal {
+    padding: var(--spacing-sm);
+  }
+  
+  .current-playing-section {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+  
+  .current-song-cover {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .music-item {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+  
+  .song-cover {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .song-name {
+    font-size: var(--font-sm);
+  }
+  
+  .song-artist,
+  .song-duration {
+    font-size: var(--font-xs);
+  }
+  
+  .volume-slider {
+    width: 60px;
+  }
+}

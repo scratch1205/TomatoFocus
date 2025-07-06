@@ -1,0 +1,212 @@
+/* 侧边栏样式 */
+
+.draggable-sidebar {
+  width: 350px;
+  height: calc(100vh - 120px);
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  position: relative;
+}
+
+.sidebar-scroll-container {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* 可拖拽组件 */
+.draggable-component {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: grab;
+}
+
+.draggable-component:active {
+  cursor: grabbing;
+}
+
+.draggable-component.dragging {
+  opacity: 0.8;
+  transform: rotate(2deg);
+  box-shadow: 0 8px 32px var(--shadow);
+}
+
+.draggable-component.drag-over {
+  border-color: var(--primary);
+  background: rgba(67, 97, 238, 0.1);
+}
+
+.draggable-component.animated {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.draggable-component:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--glass-border);
+}
+
+/* 拖拽手柄 */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.component-name {
+  flex: 1;
+}
+
+/* 组件内容 */
+.component-content {
+  position: relative;
+  overflow: hidden;
+}
+
+.component-scroll-wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+/* 打卡部分 */
+.checkin-section {
+  padding: var(--spacing-md);
+}
+
+.glass-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.solid-section {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+.checkin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.checkin-header h3 {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.checkin-streak {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-xs);
+}
+
+.checkin-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.checkin-btn:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.checkin-btn:disabled {
+  background: var(--success);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* 响应式侧边栏 */
+@media (max-width: 1200px) {
+  .draggable-sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+  }
+  
+  .sidebar-scroll-container {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+  
+  .component-scroll-wrapper {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .draggable-sidebar {
+    max-height: 400px;
+  }
+  
+  .sidebar-scroll-container {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+  
+  .component-scroll-wrapper {
+    max-height: 250px;
+    padding: var(--spacing-sm);
+  }
+  
+  .drag-handle {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-xs);
+  }
+  
+  .checkin-section {
+    padding: var(--spacing-sm);
+  }
+  
+  .checkin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .checkin-btn {
+    align-self: stretch;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .draggable-sidebar {
+    max-height: 350px;
+  }
+  
+  .component-scroll-wrapper {
+    max-height: 200px;
+  }
+}

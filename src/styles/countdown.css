@@ -1,0 +1,394 @@
+/* 倒计时组件样式 */
+
+.countdown-widget-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  height: 100%;
+}
+
+/* 倒计时头部 */
+.countdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.countdown-header h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* 预设目标 */
+.preset-goals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.preset-title {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.preset-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.preset-goal-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  color: var(--text-primary);
+}
+
+.preset-goal-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.preset-icon {
+  font-size: var(--font-lg);
+  flex-shrink: 0;
+}
+
+.preset-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.preset-name {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.preset-desc {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+/* 倒计时列表 */
+.countdown-list {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.countdown-scroll {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: var(--spacing-xs);
+  margin-right: calc(-1 * var(--spacing-xs));
+}
+
+.countdown-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.countdown-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.countdown-item.expired {
+  opacity: 0.7;
+  border-left-color: var(--error);
+}
+
+.countdown-item.animated-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 倒计时主要内容 */
+.countdown-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.countdown-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.countdown-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.category-icon {
+  font-size: var(--font-lg);
+}
+
+.countdown-description {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.countdown-target-date {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  font-family: 'Inter', monospace;
+}
+
+/* 倒计时显示 */
+.countdown-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-blocks {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 32px;
+}
+
+.time-value {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--primary);
+  font-family: 'Inter', monospace;
+  line-height: 1;
+}
+
+.time-label {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.time-separator {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin: 0 2px;
+}
+
+.expired-badge {
+  background: var(--error);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 倒计时操作 */
+.countdown-actions {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  display: flex;
+  gap: var(--spacing-xs);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.countdown-item:hover .countdown-actions {
+  opacity: 1;
+}
+
+.countdown-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.countdown-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.countdown-btn:last-child:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-title {
+  font-size: var(--font-base);
+  font-weight: 500;
+  margin-top: var(--spacing-md);
+}
+
+.empty-desc {
+  font-size: var(--font-sm);
+  margin-top: var(--spacing-xs);
+}
+
+/* 倒计时模态框 */
+.countdown-modal {
+  max-width: 600px;
+}
+
+.countdown-modal .modal-body {
+  max-height: 60vh;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.category-btn {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  font-size: var(--font-sm);
+}
+
+.category-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.category-btn.active {
+  border-color: var(--primary);
+}
+
+/* 响应式倒计时 */
+@media (max-width: 768px) {
+  .countdown-widget-container {
+    gap: var(--spacing-sm);
+  }
+  
+  .countdown-item {
+    padding: var(--spacing-sm);
+  }
+  
+  .countdown-main {
+    gap: var(--spacing-sm);
+  }
+  
+  .time-blocks {
+    gap: 4px;
+  }
+  
+  .time-block {
+    min-width: 28px;
+  }
+  
+  .time-value {
+    font-size: var(--font-base);
+  }
+  
+  .time-label {
+    font-size: 10px;
+  }
+  
+  .countdown-actions {
+    opacity: 1;
+  }
+  
+  .preset-grid {
+    gap: 4px;
+  }
+  
+  .preset-goal-btn {
+    padding: var(--spacing-xs);
+  }
+  
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .countdown-title {
+    font-size: var(--font-sm);
+  }
+  
+  .countdown-description {
+    font-size: var(--font-xs);
+  }
+  
+  .time-blocks {
+    gap: 2px;
+  }
+  
+  .time-block {
+    min-width: 24px;
+  }
+  
+  .time-value {
+    font-size: var(--font-sm);
+  }
+  
+  .time-separator {
+    font-size: var(--font-sm);
+    margin: 0 1px;
+  }
+  
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .empty-state {
+    padding: var(--spacing-lg);
+  }
+}
