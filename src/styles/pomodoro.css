@@ -1,0 +1,194 @@
+/* 番茄钟计时器样式 */
+
+.pomodoro-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xl);
+  position: relative;
+}
+
+/* 计时器显示 */
+.timer-display {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-circle {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.timer-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 4;
+}
+
+.timer-progress {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.timer-text {
+  text-align: center;
+  z-index: 1;
+}
+
+.timer-time {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-family: 'Inter', monospace;
+  letter-spacing: -0.02em;
+}
+
+.timer-status {
+  font-size: var(--font-lg);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* 水波纹效果 */
+.ripple-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 280px;
+  height: 280px;
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: ripple 3s infinite;
+}
+
+.ripple:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.ripple:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.ripple:nth-child(4) {
+  animation-delay: 1.5s;
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* 计时器控制按钮 */
+.timer-controls {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+/* 白噪音控制 */
+.noise-control {
+  margin-top: var(--spacing-lg);
+}
+
+.noise-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+}
+
+.noise-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.noise-toggle.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(67, 97, 238, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .timer-circle {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .ripple {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .timer-time {
+    font-size: 2.8rem;
+  }
+  
+  .timer-controls {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .timer-circle {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .ripple {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .timer-time {
+    font-size: 2.2rem;
+  }
+  
+  .pomodoro-container {
+    gap: var(--spacing-lg);
+  }
+}
