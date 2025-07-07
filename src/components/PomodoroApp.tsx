@@ -45,12 +45,18 @@ const PomodoroApp: React.FC = () => {
   const [notification, setNotification] = useState({ show: false, message: '' });
   const [showFullscreenClock, setShowFullscreenClock] = useState(false);
 
-  // Music states
+  // Music states - 移到顶层组件
   const [showFloatingPlayer, setShowFloatingPlayer] = useState(false);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [musicPlaylist, setMusicPlaylist] = useState<Song[]>([]);
   const [currentMusicIndex, setCurrentMusicIndex] = useState(-1);
+  const [musicVolume, setMusicVolume] = useState(0.7);
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
+  const [musicCurrentTime, setMusicCurrentTime] = useState(0);
+  const [musicDuration, setMusicDuration] = useState(0);
+  const [repeatMode, setRepeatMode] = useState<'none' | 'one' | 'all'>('none');
+  const [isShuffled, setIsShuffled] = useState(false);
 
   // Task states
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -79,6 +85,7 @@ const PomodoroApp: React.FC = () => {
   // Refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const musicAudioRef = useRef<HTMLAudioElement | null>(null); // 音乐播放器的音频元素
 
   // Get translations
   const t = useTranslation(settings.language);
@@ -194,6 +201,70 @@ const PomodoroApp: React.FC = () => {
       setTimeLeft(isWorkTime ? workTime : breakTime);
     }
   }, [workTime, breakTime, isWorkTime, isRunning]);
+
+  // 音乐播放器音频事件处理
+  useEffect(() => {
+    const audio = musicAudioRef.current;
+    if (!audio) return;
+
+    const updateTime = () => setMusicCurrentTime(audio.currentTime);
+    const updateDuration = () => setMusicDuration(audio.duration);
+    
+    const handlePlay = () => {
+      setIsMusicPlaying(true);
+      if (currentSong) {
+        showNotificationMessage(`${settings.language === 'en' ? 'Now playing' : '正在播放'}: ${currentSong.song}`);
+      }
+    };
+    
+    const handlePause = () => {
+      setIsMusicPlaying(false);
+    };
+    
+    const handleEnded = () => {
+      setIsMusicPlaying(false);
+      
+      // 根据循环模式处理播放结束
+      if (repeatMode === 'one') {
+        // 单曲循环
+        audio.currentTime = 0;
+        audio.play();
+      } else if (repeatMode === 'all' || (repeatMode === 'none' && currentMusicIndex < musicPlaylist.length - 1)) {
+        // 列表循环或顺序播放未到最后一首
+        playNextSong();
+      }
+    };
+    
+    const handleError = () => {
+      console.error('播放错误:', audio.error);
+      showNotificationMessage(`${settings.language === 'en' ? 'Play error' : '播放错误'}: ${audio.error?.message || settings.language === 'en' ? 'Unknown error' : '未知错误'}`);
+      setIsMusicPlaying(false);
+    };
+
+    audio.addEventListener('timeupdate', updateTime);
+    audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.removeEventListener('timeupdate', updateTime);
+      audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+    };
+  }, [currentSong, settings.language, repeatMode, currentMusicIndex, musicPlaylist.length]);
+
+  // 初始化音频设置
+  useEffect(() => {
+    if (musicAudioRef.current) {
+      musicAudioRef.current.volume = musicVolume;
+      musicAudioRef.current.muted = isMusicMuted;
+    }
+  }, [musicVolume, isMusicMuted]);
 
   // Timer logic - Fixed to prevent infinite loops and reset issues
   const tick = useCallback(() => {
@@ -404,6 +475,127 @@ const PomodoroApp: React.FC = () => {
     showNotificationMessage(t.checkinSuccess);
   };
 
+  // 音乐播放器控制方法
+  const loadSong = async (songId: string, index: number) => {
+    try {
+      const response = await fetch(`https://api.vkeys.cn/v2/music/netease?id=${songId}&quality=4`);
+      const data = await response.json();
+      
+      if (data.code === 200 && data.data) {
+        setCurrentSong(data.data);
+        setCurrentMusicIndex(index);
+        
+        // 设置新的音频源
+        if (musicAudioRef.current) {
+          musicAudioRef.current.src = data.data.url;
+          musicAudioRef.current.load();
+        }
+        
+        showNotificationMessage(settings.language === 'en' ? 'Music loaded' : '音乐已加载');
+      } else {
+        showNotificationMessage(data.message || (settings.language === 'en' ? 'Failed to load music' : '获取音乐失败'));
+      }
+    } catch (error) {
+      console.error('获取音乐失败:', error);
+      showNotificationMessage(`${settings.language === 'en' ? 'Failed to load music' : '获取音乐失败'}: ${error.message}`);
+    }
+  };
+
+  const toggleMusicPlay = () => {
+    if (!currentSong) {
+      showNotificationMessage(settings.language === 'en' ? 'Please select a song first' : '请先选择音乐');
+      return;
+    }
+
+    if (musicAudioRef.current) {
+      if (isMusicPlaying) {
+        musicAudioRef.current.pause();
+      } else {
+        musicAudioRef.current.play().catch(error => {
+          console.error('播放失败:', error);
+          showNotificationMessage(`${settings.language === 'en' ? 'Play failed' : '播放失败'}: ${error.message}`);
+        });
+      }
+    }
+  };
+
+  const playPreviousSong = () => {
+    if (musicPlaylist.length === 0 || currentMusicIndex === -1) return;
+    
+    const newIndex = currentMusicIndex > 0 ? currentMusicIndex - 1 : musicPlaylist.length - 1;
+    loadSong(musicPlaylist[newIndex].id, newIndex);
+  };
+
+  const playNextSong = () => {
+    if (musicPlaylist.length === 0 || currentMusicIndex === -1) return;
+    
+    let newIndex;
+    if (isShuffled) {
+      // 随机播放
+      do {
+        newIndex = Math.floor(Math.random() * musicPlaylist.length);
+      } while (newIndex === currentMusicIndex && musicPlaylist.length > 1);
+    } else {
+      // 顺序播放
+      newIndex = currentMusicIndex < musicPlaylist.length - 1 ? currentMusicIndex + 1 : 0;
+    }
+    
+    loadSong(musicPlaylist[newIndex].id, newIndex);
+  };
+
+  // Music player handlers
+  const handleSongChange = (song: Song | null) => {
+    setCurrentSong(song);
+  };
+
+  const handlePlayStateChange = (isPlaying: boolean) => {
+    setIsMusicPlaying(isPlaying);
+    // 如果音乐开始播放且音乐窗口关闭，显示悬浮播放器
+    if (isPlaying && !showMusicPlayer && currentSong) {
+      setShowFloatingPlayer(true);
+    }
+  };
+
+  const handlePlaylistChange = (playlist: Song[], currentIndex: number) => {
+    setMusicPlaylist(playlist);
+    setCurrentMusicIndex(currentIndex);
+  };
+
+  const handleMusicPlayerMinimize = () => {
+    setShowMusicPlayer(false);
+    if (currentSong && isMusicPlaying) {
+      setShowFloatingPlayer(true);
+    }
+  };
+
+  // 悬浮播放器控制方法
+  const handleFloatingTogglePlay = () => {
+    toggleMusicPlay();
+  };
+
+  const handleFloatingPrevious = () => {
+    playPreviousSong();
+  };
+
+  const handleFloatingNext = () => {
+    playNextSong();
+  };
+
+  const handleFloatingClose = () => {
+    setShowFloatingPlayer(false);
+    // 停止音乐播放
+    if (musicAudioRef.current) {
+      musicAudioRef.current.pause();
+    }
+    setIsMusicPlaying(false);
+    setCurrentSong(null);
+  };
+
+  const handleFloatingExpand = () => {
+    setShowFloatingPlayer(false);
+    setShowMusicPlayer(true);
+  };
+
   const exportData = () => {
     const data: AppData = {
       tasks,
@@ -607,68 +799,15 @@ ${t.dataExported} - ${t.appTitle}
     return ((total - timeLeft) / total) * 283; // 283 is circumference for r=45
   };
 
-  // Music player handlers
-  const handleSongChange = (song: Song | null) => {
-    setCurrentSong(song);
-  };
-
-  const handlePlayStateChange = (isPlaying: boolean) => {
-    setIsMusicPlaying(isPlaying);
-    // 如果音乐开始播放且音乐窗口关闭，显示悬浮播放器
-    if (isPlaying && !showMusicPlayer && currentSong) {
-      setShowFloatingPlayer(true);
-    }
-  };
-
-  const handlePlaylistChange = (playlist: Song[], currentIndex: number) => {
-    setMusicPlaylist(playlist);
-    setCurrentMusicIndex(currentIndex);
-  };
-
-  const handleMusicPlayerMinimize = () => {
-    setShowMusicPlayer(false);
-    if (currentSong && isMusicPlaying) {
-      setShowFloatingPlayer(true);
-    }
-  };
-
-  // 悬浮播放器控制方法
-  const handleFloatingTogglePlay = () => {
-    const controls = (window as any).musicPlayerControls;
-    if (controls) {
-      controls.togglePlayPause();
-    }
-  };
-
-  const handleFloatingPrevious = () => {
-    const controls = (window as any).musicPlayerControls;
-    if (controls) {
-      controls.playPrevious();
-    }
-  };
-
-  const handleFloatingNext = () => {
-    const controls = (window as any).musicPlayerControls;
-    if (controls) {
-      controls.playNext();
-    }
-  };
-
-  const handleFloatingClose = () => {
-    setShowFloatingPlayer(false);
-  };
-
-  const handleFloatingExpand = () => {
-    setShowFloatingPlayer(false);
-    setShowMusicPlayer(true);
-  };
-
   return (
     <>
       {/* Hidden audio for notifications */}
       <audio ref={audioRef} preload="auto">
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcBzWOzvLJe" type="audio/wav" />
       </audio>
+
+      {/* 音乐播放器的音频元素 - 移到顶层 */}
+      <audio ref={musicAudioRef} />
 
       {/* macOS风格顶部任务栏 */}
       <div className={`macos-dock ${settings.enableGlassEffect ?'glass-effect' : 'solid-bg'} ${settings.enableAnimations ? 'animated' : ''}`}>
@@ -830,6 +969,26 @@ ${t.dataExported} - ${t.appTitle}
         onSongChange={handleSongChange}
         onPlayStateChange={handlePlayStateChange}
         onPlaylistChange={handlePlaylistChange}
+        // 传递音频引用和控制方法
+        audioRef={musicAudioRef}
+        loadSong={loadSong}
+        togglePlay={toggleMusicPlay}
+        playPrevious={playPreviousSong}
+        playNext={playNextSong}
+        currentSong={currentSong}
+        isPlaying={isMusicPlaying}
+        playlist={musicPlaylist}
+        currentIndex={currentMusicIndex}
+        volume={musicVolume}
+        setVolume={setMusicVolume}
+        isMuted={isMusicMuted}
+        setIsMuted={setIsMusicMuted}
+        currentTime={musicCurrentTime}
+        duration={musicDuration}
+        repeatMode={repeatMode}
+        setRepeatMode={setRepeatMode}
+        isShuffled={isShuffled}
+        setIsShuffled={setIsShuffled}
       />
 
       {/* 悬浮音乐播放器 */}
