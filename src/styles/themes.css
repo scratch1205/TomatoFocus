@@ -172,7 +172,7 @@
   --font-3xl: 1.875rem;
   --font-4xl: 2.25rem;
   
-  /* Enhanced z-index scale */
+  /* Enhanced z-index scale - 音乐播放器设为最高级 */
   --z-dropdown: 1000;
   --z-sticky: 1020;
   --z-fixed: 1030;
@@ -181,6 +181,7 @@
   --z-popover: 1060;
   --z-tooltip: 1070;
   --z-toast: 1080;
+  --z-music-player: 999999; /* 音乐播放器最高级别 */
 }
 
 /* Enhanced theme transitions */
@@ -291,4 +292,13 @@ textarea:focus-visible {
 
 [data-theme="white"] .timer-progress {
   filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.6));
+}
+
+/* 音乐播放器模态框也设为高级别 */
+.music-player-modal {
+  z-index: var(--z-music-player) !important;
+}
+
+.music-player-modal.active {
+  z-index: var(--z-music-player) !important;
 }
