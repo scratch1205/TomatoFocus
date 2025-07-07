@@ -60,6 +60,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   // 音质选项
   const qualityOptions = [
     { value: '9', label: language === 'en' ? 'Master (Lossless)' : '超清母带' },
+    { value: '8', label: language === 'en' ? 'Surround Autio' : '沉浸环绕声' },
     { value: '6', label: language === 'en' ? 'Hi-Res (Lossless)' : 'Hi-Res无损' },
     { value: '5', label: language === 'en' ? 'SQ (Lossless)' : 'SQ无损' },
     { value: '4', label: language === 'en' ? 'HQ (320k)' : 'HQ极高(320k)' },
